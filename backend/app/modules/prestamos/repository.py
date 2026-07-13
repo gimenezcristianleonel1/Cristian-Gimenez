@@ -59,8 +59,9 @@ class PrestamoRepository:
         self.db.refresh(prestamo)
         return prestamo
 
-    def asignar_financiador(self, prestamo: Prestamo, financiador_id: int) -> Prestamo:
+    def asignar_financiador(self, prestamo: Prestamo, financiador_id: int, financiera_id: int) -> Prestamo:
         prestamo.financiador_id = financiador_id
+        prestamo.financiera_id = financiera_id
         self.db.add(prestamo)
         self.db.commit()
         self.db.refresh(prestamo)

@@ -1,14 +1,27 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { api, apiErrorMessage } from '../lib/api'
-import type { Desembolso, Financiador, Prestamo } from '../types'
+import type { Desembolso, Financiera, FinancieraEstadisticas, Financiador, Prestamo } from '../types'
 
 export function AdminDashboard() {
   const [prestamosAprobados, setPrestamosAprobados] = useState<Prestamo[]>([])
+  const [financieras, setFinancieras] = useState<Financiera[]>([])
   const [financiadores, setFinanciadores] = useState<Financiador[]>([])
   const [desembolsos, setDesembolsos] = useState<Desembolso[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [formFinanciera, setFormFinanciera] = useState({
+    nombre: '',
+    cuit: '',
+    contacto: '',
+    email: '',
+    telefono: '',
+  })
+  const [creandoFinanciera, setCreandoFinanciera] = useState(false)
+  const [estadisticasAbiertas, setEstadisticasAbiertas] = useState<Record<number, FinancieraEstadisticas>>({})
+  const [cargandoEstadisticasId, setCargandoEstadisticasId] = useState<number | null>(null)
+
+  const [financieraFinanciador, setFinancieraFinanciador] = useState('')
   const [nombreFinanciador, setNombreFinanciador] = useState('')
   const [contactoFinanciador, setContactoFinanciador] = useState('')
   const [creandoFinanciador, setCreandoFinanciador] = useState(false)
@@ -22,12 +35,14 @@ export function AdminDashboard() {
 
   async function cargarTodo() {
     setCargando(true)
-    const [prestamosRes, financiadoresRes, desembolsosRes] = await Promise.all([
+    const [prestamosRes, financierasRes, financiadoresRes, desembolsosRes] = await Promise.all([
       api.get<Prestamo[]>('/prestamos', { params: { estado: 'aprobado' } }),
+      api.get<Financiera[]>('/financieras'),
       api.get<Financiador[]>('/financiadores'),
       api.get<Desembolso[]>('/desembolsos'),
     ])
     setPrestamosAprobados(prestamosRes.data)
+    setFinancieras(financierasRes.data)
     setFinanciadores(financiadoresRes.data)
     setDesembolsos(desembolsosRes.data)
     setCargando(false)
@@ -37,12 +52,54 @@ export function AdminDashboard() {
     cargarTodo()
   }, [])
 
+  async function crearFinanciera(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setCreandoFinanciera(true)
+    try {
+      await api.post('/financieras', formFinanciera)
+      setFormFinanciera({ nombre: '', cuit: '', contacto: '', email: '', telefono: '' })
+      await cargarTodo()
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudo crear la financiera'))
+    } finally {
+      setCreandoFinanciera(false)
+    }
+  }
+
+  async function verEstadisticas(financieraId: number) {
+    setError(null)
+    if (estadisticasAbiertas[financieraId]) {
+      const copia = { ...estadisticasAbiertas }
+      delete copia[financieraId]
+      setEstadisticasAbiertas(copia)
+      return
+    }
+    setCargandoEstadisticasId(financieraId)
+    try {
+      const { data } = await api.get<FinancieraEstadisticas>(`/financieras/${financieraId}/estadisticas`)
+      setEstadisticasAbiertas({ ...estadisticasAbiertas, [financieraId]: data })
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudieron cargar las estadísticas'))
+    } finally {
+      setCargandoEstadisticasId(null)
+    }
+  }
+
   async function crearFinanciador(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (!financieraFinanciador) {
+      setError('Elegí a qué financiera pertenece el financiador')
+      return
+    }
     setCreandoFinanciador(true)
     try {
-      await api.post('/financiadores', { nombre: nombreFinanciador, contacto: contactoFinanciador })
+      await api.post('/financiadores', {
+        financiera_id: Number(financieraFinanciador),
+        nombre: nombreFinanciador,
+        contacto: contactoFinanciador,
+      })
       setNombreFinanciador('')
       setContactoFinanciador('')
       await cargarTodo()
@@ -103,8 +160,98 @@ export function AdminDashboard() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <section className="rounded-lg border border-slate-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Financieras</h2>
+        <form onSubmit={crearFinanciera} className="mb-4 grid gap-3 sm:grid-cols-3">
+          <input
+            placeholder="Nombre"
+            required
+            value={formFinanciera.nombre}
+            onChange={(e) => setFormFinanciera({ ...formFinanciera, nombre: e.target.value })}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+          <input
+            placeholder="CUIT (ej. 30-71234567-9)"
+            required
+            value={formFinanciera.cuit}
+            onChange={(e) => setFormFinanciera({ ...formFinanciera, cuit: e.target.value })}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+          <input
+            placeholder="Contacto"
+            required
+            value={formFinanciera.contacto}
+            onChange={(e) => setFormFinanciera({ ...formFinanciera, contacto: e.target.value })}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={formFinanciera.email}
+            onChange={(e) => setFormFinanciera({ ...formFinanciera, email: e.target.value })}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+          <input
+            placeholder="Teléfono"
+            required
+            value={formFinanciera.telefono}
+            onChange={(e) => setFormFinanciera({ ...formFinanciera, telefono: e.target.value })}
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={creandoFinanciera}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Agregar financiera
+          </button>
+        </form>
+        <div className="flex flex-col gap-2">
+          {financieras.map((f) => (
+            <div key={f.id} className="rounded-md border border-slate-200 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-700">
+                  {f.nombre} · CUIT {f.cuit} · {f.contacto}
+                </span>
+                <button
+                  onClick={() => verEstadisticas(f.id)}
+                  disabled={cargandoEstadisticasId === f.id}
+                  className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                >
+                  {estadisticasAbiertas[f.id] ? 'Ocultar estadísticas' : 'Ver estadísticas'}
+                </button>
+              </div>
+              {estadisticasAbiertas[f.id] && (
+                <div className="mt-3 grid gap-2 border-t border-slate-100 pt-3 text-sm text-slate-600 sm:grid-cols-3">
+                  <span>Préstamos originados: {estadisticasAbiertas[f.id].prestamos_originados}</span>
+                  <span>Monto desembolsado: ${estadisticasAbiertas[f.id].monto_total_desembolsado}</span>
+                  <span>
+                    Financiadores:{' '}
+                    {estadisticasAbiertas[f.id].financiadores.map((fdor) => fdor.nombre).join(', ') || '—'}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-6">
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Financiadores</h2>
-        <form onSubmit={crearFinanciador} className="mb-4 grid gap-3 sm:grid-cols-3">
+        <form onSubmit={crearFinanciador} className="mb-4 grid gap-3 sm:grid-cols-4">
+          <select
+            required
+            value={financieraFinanciador}
+            onChange={(e) => setFinancieraFinanciador(e.target.value)}
+            className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+          >
+            <option value="">Financiera</option>
+            {financieras.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nombre}
+              </option>
+            ))}
+          </select>
           <input
             placeholder="Nombre"
             required
@@ -130,7 +277,10 @@ export function AdminDashboard() {
         <ul className="flex flex-col gap-1 text-sm text-slate-700">
           {financiadores.map((f) => (
             <li key={f.id}>
-              {f.nombre} — {f.contacto}
+              {f.nombre} — {f.contacto} ·{' '}
+              <span className="text-slate-400">
+                {financieras.find((fin) => fin.id === f.financiera_id)?.nombre ?? `Financiera #${f.financiera_id}`}
+              </span>
             </li>
           ))}
         </ul>

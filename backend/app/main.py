@@ -6,6 +6,7 @@ from app.modules.auth.controller import router as auth_router
 from app.modules.clientes.controller import router as clientes_router
 from app.modules.desembolsos.controller import router as desembolsos_router
 from app.modules.financiadores.controller import router as financiadores_router
+from app.modules.financieras.controller import router as financieras_router
 from app.modules.prestamos.controller import router as prestamos_router
 
 settings = get_settings()
@@ -37,4 +38,5 @@ app.include_router(auth_router)
 app.include_router(clientes_router)
 app.include_router(prestamos_router)
 app.include_router(financiadores_router)
+app.include_router(financieras_router)
 app.include_router(desembolsos_router)

@@ -7,8 +7,8 @@ class FinanciadorRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, nombre: str, contacto: str) -> Financiador:
-        financiador = Financiador(nombre=nombre, contacto=contacto)
+    def create(self, financiera_id: int, nombre: str, contacto: str) -> Financiador:
+        financiador = Financiador(financiera_id=financiera_id, nombre=nombre, contacto=contacto)
         self.db.add(financiador)
         self.db.commit()
         self.db.refresh(financiador)

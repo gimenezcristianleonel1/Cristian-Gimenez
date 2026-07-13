@@ -43,12 +43,33 @@ export interface Prestamo {
   motivo: string
   estado: EstadoPrestamo
   financiador_id: number | null
+  financiera_id: number | null
   fecha_solicitud: string
   evaluacion: Evaluacion | null
 }
 
+export interface Financiera {
+  id: number
+  nombre: string
+  cuit: string
+  contacto: string
+  email: string
+  telefono: string
+  activa: boolean
+  created_at: string
+}
+
+export interface FinancieraEstadisticas {
+  financiera_id: number
+  nombre: string
+  prestamos_originados: number
+  monto_total_desembolsado: string
+  financiadores: Financiador[]
+}
+
 export interface Financiador {
   id: number
+  financiera_id: number
   nombre: string
   contacto: string
   activo: boolean

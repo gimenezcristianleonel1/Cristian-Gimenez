@@ -22,9 +22,11 @@ class Prestamo(Base):
         nullable=False,
     )
     financiador_id: Mapped[int | None] = mapped_column(ForeignKey("financiadores.id"), nullable=True)
+    financiera_id: Mapped[int | None] = mapped_column(ForeignKey("financieras.id"), nullable=True)
     fecha_solicitud: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     cliente: Mapped["Cliente"] = relationship(back_populates="prestamos")
     financiador: Mapped["Financiador | None"] = relationship(back_populates="prestamos")
+    financiera: Mapped["Financiera | None"] = relationship(back_populates="prestamos")
     evaluacion: Mapped["Evaluacion | None"] = relationship(back_populates="prestamo", uselist=False)
     desembolso: Mapped["Desembolso | None"] = relationship(back_populates="prestamo", uselist=False)

@@ -7,6 +7,7 @@ from app.models.enums import RolUsuario
 from app.modules.financiadores.repository import FinanciadorRepository
 from app.modules.financiadores.schemas import AsignarFinanciador, FinanciadorCreate, FinanciadorResponse
 from app.modules.financiadores.service import FinanciadorService
+from app.modules.financieras.repository import FinancieraRepository
 from app.modules.prestamos.repository import PrestamoRepository
 from app.modules.prestamos.schemas import PrestamoResponse
 
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/financiadores", tags=["financiadores"])
 
 
 def get_financiador_service(db: Session = Depends(get_db)) -> FinanciadorService:
-    return FinanciadorService(FinanciadorRepository(db), PrestamoRepository(db))
+    return FinanciadorService(FinanciadorRepository(db), PrestamoRepository(db), FinancieraRepository(db))
 
 
 @router.post(
@@ -26,7 +27,7 @@ def get_financiador_service(db: Session = Depends(get_db)) -> FinanciadorService
 def crear_financiador(
     data: FinanciadorCreate, service: FinanciadorService = Depends(get_financiador_service)
 ) -> FinanciadorResponse:
-    return service.crear(nombre=data.nombre, contacto=data.contacto)
+    return service.crear(financiera_id=data.financiera_id, nombre=data.nombre, contacto=data.contacto)
 
 
 @router.get(

@@ -3,17 +3,28 @@ from fastapi import HTTPException, status
 from app.models.enums import EstadoPrestamo
 from app.models.financiador import Financiador
 from app.models.prestamo import Prestamo
+from app.modules.financieras.repository import FinancieraRepository
 from app.modules.financiadores.repository import FinanciadorRepository
 from app.modules.prestamos.repository import PrestamoRepository
 
 
 class FinanciadorService:
-    def __init__(self, repository: FinanciadorRepository, prestamo_repository: PrestamoRepository) -> None:
+    def __init__(
+        self,
+        repository: FinanciadorRepository,
+        prestamo_repository: PrestamoRepository,
+        financiera_repository: FinancieraRepository,
+    ) -> None:
         self.repository = repository
         self.prestamo_repository = prestamo_repository
+        self.financiera_repository = financiera_repository
 
-    def crear(self, nombre: str, contacto: str) -> Financiador:
-        return self.repository.create(nombre=nombre, contacto=contacto)
+    def crear(self, financiera_id: int, nombre: str, contacto: str) -> Financiador:
+        financiera = self.financiera_repository.get_by_id(financiera_id)
+        if financiera is None or not financiera.activa:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financiera no disponible")
+
+        return self.repository.create(financiera_id=financiera_id, nombre=nombre, contacto=contacto)
 
     def listar(self) -> list[Financiador]:
         return self.repository.list_all()
@@ -33,4 +44,6 @@ class FinanciadorService:
         if financiador is None or not financiador.activo:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financiador no disponible")
 
-        return self.prestamo_repository.asignar_financiador(prestamo, financiador_id)
+        return self.prestamo_repository.asignar_financiador(
+            prestamo, financiador_id, financiador.financiera_id
+        )

@@ -32,6 +32,7 @@ class PrestamoResponse(BaseModel):
     motivo: str
     estado: EstadoPrestamo
     financiador_id: int | None
+    financiera_id: int | None
     fecha_solicitud: datetime
     evaluacion: EvaluacionResponse | None = None
 
