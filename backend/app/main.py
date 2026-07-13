@@ -8,6 +8,7 @@ from app.modules.desembolsos.controller import router as desembolsos_router
 from app.modules.financiadores.controller import router as financiadores_router
 from app.modules.financieras.controller import router as financieras_router
 from app.modules.prestamos.controller import router as prestamos_router
+from app.modules.simulador.controller import router as simulador_router
 from app.modules.staff.controller import router as staff_router
 
 settings = get_settings()
@@ -42,3 +43,4 @@ app.include_router(financiadores_router)
 app.include_router(financieras_router)
 app.include_router(desembolsos_router)
 app.include_router(staff_router)
+app.include_router(simulador_router)

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { api, apiErrorMessage } from '../lib/api'
 import type { Prestamo } from '../types'
 
@@ -62,7 +63,12 @@ export function ClienteDashboard() {
   return (
     <div className="flex flex-col gap-8">
       <section className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Solicitar préstamo</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">Solicitar préstamo</h2>
+          <Link to="/simulador" className="text-sm text-blue-600 hover:underline">
+            Simular antes de solicitar
+          </Link>
+        </div>
         <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Monto solicitado</label>

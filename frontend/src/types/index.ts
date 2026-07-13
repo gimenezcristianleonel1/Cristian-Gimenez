@@ -87,6 +87,24 @@ export interface Financiador {
   created_at: string
 }
 
+export interface CuotaAmortizacion {
+  numero_cuota: number
+  cuota: string
+  interes: string
+  amortizacion: string
+  saldo: string
+}
+
+export interface SimulacionResponse {
+  monto: string
+  tasa: string
+  cantidad_cuotas: number
+  valor_cuota: string
+  interes_total: string
+  monto_final: string
+  tabla_amortizacion: CuotaAmortizacion[]
+}
+
 export interface Desembolso {
   id: number
   prestamo_id: number

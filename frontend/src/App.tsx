@@ -13,6 +13,7 @@ import { ClienteDashboard } from './pages/ClienteDashboard'
 import { OperadorDashboard } from './pages/OperadorDashboard'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { FinanciadoresPage } from './pages/FinanciadoresPage'
+import { SimuladorPage } from './pages/SimuladorPage'
 
 function AppRoutes() {
   return (
@@ -21,6 +22,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegistroPage />} />
       <Route path="/staff/login" element={<StaffLoginPage />} />
+      <Route path="/simulador" element={<SimuladorPage />} />
       <Route
         path="/cliente"
         element={
