@@ -12,6 +12,7 @@ import { RegistroPage } from './pages/RegistroPage'
 import { ClienteDashboard } from './pages/ClienteDashboard'
 import { OperadorDashboard } from './pages/OperadorDashboard'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { FinanciadoresPage } from './pages/FinanciadoresPage'
 
 function AppRoutes() {
   return (
@@ -46,6 +47,16 @@ function AppRoutes() {
           <StaffProtectedRoute roles={['administrador']}>
             <StaffLayout>
               <AdminDashboard />
+            </StaffLayout>
+          </StaffProtectedRoute>
+        }
+      />
+      <Route
+        path="/administrador/financiadores"
+        element={
+          <StaffProtectedRoute roles={['administrador']}>
+            <StaffLayout>
+              <FinanciadoresPage />
             </StaffLayout>
           </StaffProtectedRoute>
         }

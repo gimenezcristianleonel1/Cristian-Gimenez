@@ -79,6 +79,10 @@ export interface Financiador {
   financiera_id: number
   nombre: string
   contacto: string
+  capital_aportado: string
+  capital_disponible: string
+  rendimiento_acordado: string
+  observaciones: string | null
   activo: boolean
   created_at: string
 }

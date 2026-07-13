@@ -1,11 +1,14 @@
 import uuid
 from decimal import Decimal
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.enums import DecisionEvaluacion, EstadoPrestamo
 from app.models.evaluacion import Evaluacion
 from app.models.prestamo import Prestamo
+
+ESTADOS_PRESTAMO_ACTIVO = (EstadoPrestamo.APROBADO, EstadoPrestamo.DESEMBOLSADO)
 
 
 class PrestamoRepository:
@@ -74,3 +77,11 @@ class PrestamoRepository:
         self.db.commit()
         self.db.refresh(prestamo)
         return prestamo
+
+    def contar_activos_por_financiador(self, financiador_id: int) -> int:
+        return (
+            self.db.query(func.count(Prestamo.id))
+            .filter(Prestamo.financiador_id == financiador_id)
+            .filter(Prestamo.estado.in_(ESTADOS_PRESTAMO_ACTIVO))
+            .scalar()
+        )
