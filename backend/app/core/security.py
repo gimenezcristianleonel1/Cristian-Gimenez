@@ -28,3 +28,16 @@ def decode_access_token(token: str) -> dict | None:
         return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
     except JWTError:
         return None
+
+
+def decode_supabase_token(token: str) -> dict | None:
+    """Verifica un JWT emitido por Supabase Auth (sesión de staff)."""
+    try:
+        return jwt.decode(
+            token,
+            settings.supabase_jwt_secret,
+            algorithms=["HS256"],
+            options={"verify_aud": False},
+        )
+    except JWTError:
+        return None

@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from fastapi import HTTPException, status
@@ -16,7 +17,7 @@ class DesembolsoService:
     def registrar(
         self,
         prestamo_id: int,
-        registrado_por_id: int,
+        registrado_por_id: uuid.UUID,
         monto: Decimal,
         metodo: str,
         observaciones: str | None,

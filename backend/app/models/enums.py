@@ -1,10 +1,9 @@
 import enum
 
 
-class RolUsuario(str, enum.Enum):
-    ADMIN = "admin"
-    ANALISTA = "analista"
-    CLIENTE = "cliente"
+class RolStaff(str, enum.Enum):
+    ADMINISTRADOR = "administrador"
+    OPERADOR = "operador"
 
 
 class EstadoPrestamo(str, enum.Enum):

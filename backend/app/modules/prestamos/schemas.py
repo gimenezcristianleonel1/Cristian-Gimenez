@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from decimal import Decimal
 
@@ -16,7 +17,7 @@ class EvaluacionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    analista_id: int
+    operador_id: uuid.UUID
     decision: DecisionEvaluacion
     observaciones: str
     fecha_evaluacion: datetime

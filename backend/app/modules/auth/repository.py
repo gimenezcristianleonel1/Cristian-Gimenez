@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 
-from app.models.enums import RolUsuario
 from app.models.usuario import Usuario
 
 
@@ -14,8 +13,8 @@ class UsuarioRepository:
     def get_by_id(self, usuario_id: int) -> Usuario | None:
         return self.db.get(Usuario, usuario_id)
 
-    def create(self, nombre: str, email: str, hashed_password: str, rol: RolUsuario) -> Usuario:
-        usuario = Usuario(nombre=nombre, email=email, hashed_password=hashed_password, rol=rol)
+    def create(self, nombre: str, email: str, hashed_password: str) -> Usuario:
+        usuario = Usuario(nombre=nombre, email=email, hashed_password=hashed_password)
         self.db.add(usuario)
         self.db.commit()
         self.db.refresh(usuario)

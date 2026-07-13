@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
@@ -10,7 +11,12 @@ class DesembolsoRepository:
         self.db = db
 
     def create(
-        self, prestamo_id: int, registrado_por_id: int, monto: Decimal, metodo: str, observaciones: str | None
+        self,
+        prestamo_id: int,
+        registrado_por_id: uuid.UUID,
+        monto: Decimal,
+        metodo: str,
+        observaciones: str | None,
     ) -> Desembolso:
         desembolso = Desembolso(
             prestamo_id=prestamo_id,

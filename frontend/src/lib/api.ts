@@ -1,11 +1,23 @@
 import axios from 'axios'
+import { supabase } from './supabaseClient'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
 })
 
+let staffAccessToken: string | null = null
+
+supabase.auth.getSession().then(({ data }) => {
+  staffAccessToken = data.session?.access_token ?? null
+})
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  staffAccessToken = session?.access_token ?? null
+})
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const clienteToken = localStorage.getItem('token')
+  const token = staffAccessToken ?? clienteToken
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

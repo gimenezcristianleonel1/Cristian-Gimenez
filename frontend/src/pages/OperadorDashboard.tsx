@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, apiErrorMessage } from '../lib/api'
 import type { DecisionEvaluacion, Prestamo } from '../types'
 
-export function AnalistaDashboard() {
+export function OperadorDashboard() {
   const [prestamos, setPrestamos] = useState<Prestamo[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)

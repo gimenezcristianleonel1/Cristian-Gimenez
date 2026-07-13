@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
@@ -42,11 +43,11 @@ class PrestamoRepository:
         return query.order_by(Prestamo.id.desc()).all()
 
     def registrar_evaluacion(
-        self, prestamo: Prestamo, analista_id: int, decision: DecisionEvaluacion, observaciones: str
+        self, prestamo: Prestamo, operador_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
     ) -> Prestamo:
         evaluacion = Evaluacion(
             prestamo_id=prestamo.id,
-            analista_id=analista_id,
+            operador_id=operador_id,
             decision=decision,
             observaciones=observaciones,
         )

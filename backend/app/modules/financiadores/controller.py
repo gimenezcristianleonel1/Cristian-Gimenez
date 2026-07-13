@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import require_roles
-from app.models.enums import RolUsuario
+from app.core.deps import require_staff_roles
+from app.models.enums import RolStaff
 from app.modules.financiadores.repository import FinanciadorRepository
 from app.modules.financiadores.schemas import AsignarFinanciador, FinanciadorCreate, FinanciadorResponse
 from app.modules.financiadores.service import FinanciadorService
@@ -22,7 +22,7 @@ def get_financiador_service(db: Session = Depends(get_db)) -> FinanciadorService
     "",
     response_model=FinanciadorResponse,
     status_code=201,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
 )
 def crear_financiador(
     data: FinanciadorCreate, service: FinanciadorService = Depends(get_financiador_service)
@@ -33,7 +33,7 @@ def crear_financiador(
 @router.get(
     "",
     response_model=list[FinanciadorResponse],
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def listar_financiadores(
     service: FinanciadorService = Depends(get_financiador_service),
@@ -44,7 +44,7 @@ def listar_financiadores(
 @router.post(
     "/asignar",
     response_model=PrestamoResponse,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
 )
 def asignar_financiador(
     data: AsignarFinanciador, service: FinanciadorService = Depends(get_financiador_service)

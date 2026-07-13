@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import require_roles
-from app.models.enums import RolUsuario
+from app.core.deps import require_staff_roles
+from app.models.enums import RolStaff
 from app.modules.financieras.repository import FinancieraRepository
 from app.modules.financieras.schemas import FinancieraCreate, FinancieraEstadisticas, FinancieraResponse
 from app.modules.financieras.service import FinancieraService
@@ -19,7 +19,7 @@ def get_financiera_service(db: Session = Depends(get_db)) -> FinancieraService:
     "",
     response_model=FinancieraResponse,
     status_code=201,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
 )
 def crear_financiera(
     data: FinancieraCreate, service: FinancieraService = Depends(get_financiera_service)
@@ -32,7 +32,7 @@ def crear_financiera(
 @router.get(
     "",
     response_model=list[FinancieraResponse],
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def listar_financieras(
     service: FinancieraService = Depends(get_financiera_service),
@@ -43,7 +43,7 @@ def listar_financieras(
 @router.get(
     "/{financiera_id}",
     response_model=FinancieraResponse,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def obtener_financiera(
     financiera_id: int, service: FinancieraService = Depends(get_financiera_service)
@@ -54,7 +54,7 @@ def obtener_financiera(
 @router.get(
     "/{financiera_id}/estadisticas",
     response_model=FinancieraEstadisticas,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def estadisticas_financiera(
     financiera_id: int, service: FinancieraService = Depends(get_financiera_service)

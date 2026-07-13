@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     environment: str = "local"
 
+    # Supabase Auth: usado para verificar los JWT que emite Supabase para el
+    # staff interno (Administrador/Operador). Project Settings → API → JWT Settings.
+    supabase_jwt_secret: str
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

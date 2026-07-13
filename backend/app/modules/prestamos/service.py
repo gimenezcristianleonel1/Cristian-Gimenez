@@ -1,10 +1,11 @@
+import uuid
 from decimal import Decimal
 
 from fastapi import HTTPException, status
 
-from app.models.enums import DecisionEvaluacion, EstadoPrestamo, RolUsuario
+from app.core.deps import ActorCliente, ActorStaff
+from app.models.enums import DecisionEvaluacion, EstadoPrestamo
 from app.models.prestamo import Prestamo
-from app.models.usuario import Usuario
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.prestamos.repository import PrestamoRepository
 
@@ -35,18 +36,18 @@ class PrestamoService:
     def listar_todos(self, estado: EstadoPrestamo | None) -> list[Prestamo]:
         return self.repository.list_all(estado)
 
-    def obtener(self, prestamo_id: int, usuario: Usuario) -> Prestamo:
+    def obtener(self, prestamo_id: int, actor: ActorCliente | ActorStaff) -> Prestamo:
         prestamo = self.repository.get_by_id(prestamo_id)
         if prestamo is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Préstamo no encontrado")
 
-        if usuario.rol == RolUsuario.CLIENTE and prestamo.cliente.usuario_id != usuario.id:
+        if isinstance(actor, ActorCliente) and prestamo.cliente.usuario_id != actor.usuario.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No podés ver este préstamo")
 
         return prestamo
 
     def evaluar(
-        self, prestamo_id: int, analista_id: int, decision: DecisionEvaluacion, observaciones: str
+        self, prestamo_id: int, operador_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
     ) -> Prestamo:
         prestamo = self.repository.get_by_id(prestamo_id)
         if prestamo is None:
@@ -59,5 +60,5 @@ class PrestamoService:
             )
 
         return self.repository.registrar_evaluacion(
-            prestamo=prestamo, analista_id=analista_id, decision=decision, observaciones=observaciones
+            prestamo=prestamo, operador_id=operador_id, decision=decision, observaciones=observaciones
         )

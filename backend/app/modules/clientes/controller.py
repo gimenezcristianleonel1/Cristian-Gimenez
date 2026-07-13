@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_roles
+from app.core.deps import get_current_user, require_staff_roles
 from app.core.security import create_access_token
-from app.models.enums import RolUsuario
+from app.models.enums import RolStaff
 from app.models.usuario import Usuario
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.schemas import TokenResponse
@@ -32,15 +32,11 @@ def registrar_cliente(
         telefono=data.telefono,
         direccion=data.direccion,
     )
-    token = create_access_token(subject=str(cliente.usuario.id), role=RolUsuario.CLIENTE.value)
-    return TokenResponse(access_token=token, rol=RolUsuario.CLIENTE)
+    token = create_access_token(subject=str(cliente.usuario.id), role="cliente")
+    return TokenResponse(access_token=token)
 
 
-@router.get(
-    "/me",
-    response_model=ClienteResponse,
-    dependencies=[Depends(require_roles(RolUsuario.CLIENTE))],
-)
+@router.get("/me", response_model=ClienteResponse)
 def mi_perfil(
     usuario: Usuario = Depends(get_current_user),
     service: ClienteService = Depends(get_cliente_service),
@@ -51,7 +47,7 @@ def mi_perfil(
 @router.get(
     "",
     response_model=list[ClienteResponse],
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def listar_clientes(service: ClienteService = Depends(get_cliente_service)) -> list[ClienteResponse]:
     return service.listar()
@@ -60,7 +56,7 @@ def listar_clientes(service: ClienteService = Depends(get_cliente_service)) -> l
 @router.get(
     "/{cliente_id}",
     response_model=ClienteResponse,
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def obtener_cliente(
     cliente_id: int, service: ClienteService = Depends(get_cliente_service)

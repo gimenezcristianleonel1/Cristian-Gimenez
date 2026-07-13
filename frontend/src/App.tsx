@@ -1,12 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
+import { StaffAuthProvider } from './auth/StaffAuthContext'
 import { ProtectedRoute } from './auth/ProtectedRoute'
-import { Layout } from './components/Layout'
+import { StaffProtectedRoute } from './auth/StaffProtectedRoute'
+import { ClienteLayout } from './components/ClienteLayout'
+import { StaffLayout } from './components/StaffLayout'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { StaffLoginPage } from './pages/StaffLoginPage'
 import { RegistroPage } from './pages/RegistroPage'
 import { ClienteDashboard } from './pages/ClienteDashboard'
-import { AnalistaDashboard } from './pages/AnalistaDashboard'
+import { OperadorDashboard } from './pages/OperadorDashboard'
 import { AdminDashboard } from './pages/AdminDashboard'
 
 function AppRoutes() {
@@ -15,34 +19,35 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegistroPage />} />
+      <Route path="/staff/login" element={<StaffLoginPage />} />
       <Route
         path="/cliente"
         element={
-          <ProtectedRoute roles={['cliente']}>
-            <Layout>
+          <ProtectedRoute>
+            <ClienteLayout>
               <ClienteDashboard />
-            </Layout>
+            </ClienteLayout>
           </ProtectedRoute>
         }
       />
       <Route
-        path="/analista"
+        path="/operador"
         element={
-          <ProtectedRoute roles={['analista']}>
-            <Layout>
-              <AnalistaDashboard />
-            </Layout>
-          </ProtectedRoute>
+          <StaffProtectedRoute roles={['operador']}>
+            <StaffLayout>
+              <OperadorDashboard />
+            </StaffLayout>
+          </StaffProtectedRoute>
         }
       />
       <Route
-        path="/admin"
+        path="/administrador"
         element={
-          <ProtectedRoute roles={['admin']}>
-            <Layout>
+          <StaffProtectedRoute roles={['administrador']}>
+            <StaffLayout>
               <AdminDashboard />
-            </Layout>
-          </ProtectedRoute>
+            </StaffLayout>
+          </StaffProtectedRoute>
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -53,7 +58,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <StaffAuthProvider>
+        <AppRoutes />
+      </StaffAuthProvider>
     </AuthProvider>
   )
 }

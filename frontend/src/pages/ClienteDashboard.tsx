@@ -131,7 +131,7 @@ export function ClienteDashboard() {
                 </p>
                 {p.evaluacion && (
                   <p className="mt-2 text-sm text-slate-500">
-                    Observaciones del analista: {p.evaluacion.observaciones}
+                    Observaciones del operador: {p.evaluacion.observaciones}
                   </p>
                 )}
               </div>

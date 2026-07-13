@@ -1,4 +1,4 @@
-export type Rol = 'admin' | 'analista' | 'cliente'
+export type RolStaff = 'administrador' | 'operador'
 
 export type EstadoPrestamo =
   | 'solicitado'
@@ -13,7 +13,14 @@ export interface Usuario {
   id: number
   nombre: string
   email: string
-  rol: Rol
+  activo: boolean
+  created_at: string
+}
+
+export interface Staff {
+  id: string
+  nombre: string
+  rol: RolStaff
   activo: boolean
   created_at: string
 }
@@ -29,7 +36,7 @@ export interface Cliente {
 
 export interface Evaluacion {
   id: number
-  analista_id: number
+  operador_id: string
   decision: DecisionEvaluacion
   observaciones: string
   fecha_evaluacion: string
@@ -79,7 +86,7 @@ export interface Financiador {
 export interface Desembolso {
   id: number
   prestamo_id: number
-  registrado_por_id: number
+  registrado_por_id: string
   monto: string
   metodo: string
   observaciones: string | null

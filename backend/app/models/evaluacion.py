@@ -1,6 +1,8 @@
+import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Text, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -12,7 +14,7 @@ class Evaluacion(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     prestamo_id: Mapped[int] = mapped_column(ForeignKey("prestamos.id"), unique=True, nullable=False)
-    analista_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    operador_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("staff.id"), nullable=False)
     decision: Mapped[DecisionEvaluacion] = mapped_column(
         Enum(DecisionEvaluacion, name="decision_evaluacion"), nullable=False
     )

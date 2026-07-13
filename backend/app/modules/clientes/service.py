@@ -1,7 +1,6 @@
 from fastapi import HTTPException, status
 
 from app.models.cliente import Cliente
-from app.models.enums import RolUsuario
 from app.modules.auth.service import AuthService
 from app.modules.clientes.repository import ClienteRepository
 
@@ -17,9 +16,7 @@ class ClienteService:
         if self.repository.get_by_dni(dni) is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El DNI ya está registrado")
 
-        usuario = self.auth_service.crear_usuario(
-            nombre=nombre, email=email, password=password, rol=RolUsuario.CLIENTE
-        )
+        usuario = self.auth_service.crear_usuario(nombre=nombre, email=email, password=password)
         return self.repository.create(
             usuario_id=usuario.id, dni=dni, telefono=telefono, direccion=direccion
         )

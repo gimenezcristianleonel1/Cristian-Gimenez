@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_roles
-from app.models.enums import EstadoPrestamo, RolUsuario
+from app.core.deps import ActorCliente, ActorStaff, get_current_actor, get_current_user, require_staff_roles
+from app.models.enums import EstadoPrestamo, RolStaff
+from app.models.staff import Staff
 from app.models.usuario import Usuario
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.prestamos.repository import PrestamoRepository
@@ -17,12 +18,7 @@ def get_prestamo_service(db: Session = Depends(get_db)) -> PrestamoService:
     return PrestamoService(PrestamoRepository(db), ClienteRepository(db))
 
 
-@router.post(
-    "",
-    response_model=PrestamoResponse,
-    status_code=201,
-    dependencies=[Depends(require_roles(RolUsuario.CLIENTE))],
-)
+@router.post("", response_model=PrestamoResponse, status_code=201)
 def solicitar_prestamo(
     data: PrestamoCreate,
     usuario: Usuario = Depends(get_current_user),
@@ -36,11 +32,7 @@ def solicitar_prestamo(
     )
 
 
-@router.get(
-    "/me",
-    response_model=list[PrestamoResponse],
-    dependencies=[Depends(require_roles(RolUsuario.CLIENTE))],
-)
+@router.get("/me", response_model=list[PrestamoResponse])
 def mis_prestamos(
     usuario: Usuario = Depends(get_current_user),
     service: PrestamoService = Depends(get_prestamo_service),
@@ -51,7 +43,7 @@ def mis_prestamos(
 @router.get(
     "",
     response_model=list[PrestamoResponse],
-    dependencies=[Depends(require_roles(RolUsuario.ADMIN, RolUsuario.ANALISTA))],
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
 )
 def listar_prestamos(
     estado: EstadoPrestamo | None = Query(default=None),
@@ -63,26 +55,22 @@ def listar_prestamos(
 @router.get("/{prestamo_id}", response_model=PrestamoResponse)
 def obtener_prestamo(
     prestamo_id: int,
-    usuario: Usuario = Depends(get_current_user),
+    actor: ActorCliente | ActorStaff = Depends(get_current_actor),
     service: PrestamoService = Depends(get_prestamo_service),
 ) -> PrestamoResponse:
-    return service.obtener(prestamo_id, usuario)
+    return service.obtener(prestamo_id, actor)
 
 
-@router.post(
-    "/{prestamo_id}/evaluar",
-    response_model=PrestamoResponse,
-    dependencies=[Depends(require_roles(RolUsuario.ANALISTA))],
-)
+@router.post("/{prestamo_id}/evaluar", response_model=PrestamoResponse)
 def evaluar_prestamo(
     prestamo_id: int,
     data: EvaluacionCreate,
-    usuario: Usuario = Depends(get_current_user),
+    staff: Staff = Depends(require_staff_roles(RolStaff.OPERADOR)),
     service: PrestamoService = Depends(get_prestamo_service),
 ) -> PrestamoResponse:
     return service.evaluar(
         prestamo_id=prestamo_id,
-        analista_id=usuario.id,
+        operador_id=staff.id,
         decision=data.decision,
         observaciones=data.observaciones,
     )

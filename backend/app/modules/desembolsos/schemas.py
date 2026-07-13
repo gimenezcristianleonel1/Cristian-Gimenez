@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from decimal import Decimal
 
@@ -16,7 +17,7 @@ class DesembolsoResponse(BaseModel):
 
     id: int
     prestamo_id: int
-    registrado_por_id: int
+    registrado_por_id: uuid.UUID
     monto: Decimal
     metodo: str
     observaciones: str | None
