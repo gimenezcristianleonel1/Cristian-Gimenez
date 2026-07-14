@@ -22,11 +22,34 @@ class PrestamoService:
         return cliente.id
 
     def solicitar(
-        self, usuario_id: int, monto_solicitado: Decimal, plazo_meses: int, motivo: str
+        self, usuario_id: int, monto_solicitado: Decimal, cantidad_cuotas: int, destino: str
     ) -> Prestamo:
         cliente_id = self._cliente_de(usuario_id)
         return self.repository.create(
-            cliente_id=cliente_id, monto_solicitado=monto_solicitado, plazo_meses=plazo_meses, motivo=motivo
+            cliente_id=cliente_id,
+            monto_solicitado=monto_solicitado,
+            cantidad_cuotas=cantidad_cuotas,
+            destino=destino,
+        )
+
+    def crear_por_staff(
+        self,
+        cliente_id: int,
+        monto_solicitado: Decimal,
+        cantidad_cuotas: int,
+        tasa: Decimal,
+        destino: str,
+        observaciones: str | None,
+    ) -> Prestamo:
+        if self.cliente_repository.get_by_id(cliente_id) is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado")
+        return self.repository.create(
+            cliente_id=cliente_id,
+            monto_solicitado=monto_solicitado,
+            cantidad_cuotas=cantidad_cuotas,
+            destino=destino,
+            tasa=tasa,
+            observaciones=observaciones,
         )
 
     def listar_mios(self, usuario_id: int) -> list[Prestamo]:
@@ -53,10 +76,10 @@ class PrestamoService:
         if prestamo is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Préstamo no encontrado")
 
-        if prestamo.estado != EstadoPrestamo.SOLICITADO:
+        if prestamo.estado != EstadoPrestamo.PENDIENTE:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="El préstamo ya fue evaluado o no está en estado solicitado",
+                detail="El préstamo ya fue evaluado o no está pendiente",
             )
 
         return self.repository.registrar_evaluacion(

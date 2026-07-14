@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api, apiErrorMessage } from '../lib/api'
 import type { DecisionEvaluacion, Prestamo } from '../types'
 
@@ -11,7 +12,7 @@ export function OperadorDashboard() {
 
   async function cargar() {
     setCargando(true)
-    const { data } = await api.get<Prestamo[]>('/prestamos', { params: { estado: 'solicitado' } })
+    const { data } = await api.get<Prestamo[]>('/prestamos', { params: { estado: 'pendiente' } })
     setPrestamos(data)
     setCargando(false)
   }
@@ -40,7 +41,12 @@ export function OperadorDashboard() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold text-slate-900">Préstamos pendientes de evaluación</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-900">Préstamos pendientes de evaluación</h2>
+        <Link to="/solicitudes" className="text-sm text-blue-600 hover:underline">
+          Ver todas las solicitudes
+        </Link>
+      </div>
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
       {cargando ? (
         <p className="text-sm text-slate-500">Cargando...</p>
@@ -54,9 +60,13 @@ export function OperadorDashboard() {
                 <span className="font-medium text-slate-900">
                   Cliente #{p.cliente_id} · ${p.monto_solicitado}
                 </span>
-                <span className="text-sm text-slate-500">{p.plazo_meses} meses</span>
+                <span className="text-sm text-slate-500">{p.cantidad_cuotas} cuotas</span>
               </div>
-              <p className="mt-1 text-sm text-slate-600">{p.motivo}</p>
+              <p className="mt-1 text-sm text-slate-600">{p.destino}</p>
+              {p.tasa && <p className="mt-1 text-xs text-slate-400">Tasa propuesta: {p.tasa}%</p>}
+              {p.observaciones && (
+                <p className="mt-1 text-xs text-slate-400">Observaciones: {p.observaciones}</p>
+              )}
               <textarea
                 placeholder="Observaciones de la evaluación"
                 value={observaciones[p.id] ?? ''}

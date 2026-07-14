@@ -8,7 +8,12 @@ from app.models.staff import Staff
 from app.models.usuario import Usuario
 from app.modules.clientes.repository import ClienteRepository
 from app.modules.prestamos.repository import PrestamoRepository
-from app.modules.prestamos.schemas import EvaluacionCreate, PrestamoCreate, PrestamoResponse
+from app.modules.prestamos.schemas import (
+    EvaluacionCreate,
+    PrestamoCreate,
+    PrestamoResponse,
+    SolicitudStaffCreate,
+)
 from app.modules.prestamos.service import PrestamoService
 
 router = APIRouter(prefix="/prestamos", tags=["prestamos"])
@@ -27,8 +32,28 @@ def solicitar_prestamo(
     return service.solicitar(
         usuario_id=usuario.id,
         monto_solicitado=data.monto_solicitado,
-        plazo_meses=data.plazo_meses,
-        motivo=data.motivo,
+        cantidad_cuotas=data.cantidad_cuotas,
+        destino=data.destino,
+    )
+
+
+@router.post(
+    "/solicitudes",
+    response_model=PrestamoResponse,
+    status_code=201,
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
+)
+def crear_solicitud_staff(
+    data: SolicitudStaffCreate, service: PrestamoService = Depends(get_prestamo_service)
+) -> PrestamoResponse:
+    """Carga una solicitud en nombre de un cliente ya existente (staff)."""
+    return service.crear_por_staff(
+        cliente_id=data.cliente_id,
+        monto_solicitado=data.monto_solicitado,
+        cantidad_cuotas=data.cantidad_cuotas,
+        tasa=data.tasa,
+        destino=data.destino,
+        observaciones=data.observaciones,
     )
 
 

@@ -1,7 +1,7 @@
 export type RolStaff = 'administrador' | 'operador'
 
 export type EstadoPrestamo =
-  | 'solicitado'
+  | 'pendiente'
   | 'en_evaluacion'
   | 'aprobado'
   | 'rechazado'
@@ -46,8 +46,10 @@ export interface Prestamo {
   id: number
   cliente_id: number
   monto_solicitado: string
-  plazo_meses: number
-  motivo: string
+  cantidad_cuotas: number
+  destino: string
+  tasa: string | null
+  observaciones: string | null
   estado: EstadoPrestamo
   financiador_id: number | null
   financiera_id: number | null

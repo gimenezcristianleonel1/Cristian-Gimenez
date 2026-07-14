@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -14,11 +14,13 @@ class Prestamo(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     cliente_id: Mapped[int] = mapped_column(ForeignKey("clientes.id"), nullable=False)
     monto_solicitado: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    plazo_meses: Mapped[int] = mapped_column(nullable=False)
-    motivo: Mapped[str] = mapped_column(Text, nullable=False)
+    cantidad_cuotas: Mapped[int] = mapped_column(nullable=False)
+    destino: Mapped[str] = mapped_column(Text, nullable=False)
+    tasa: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    observaciones: Mapped[str | None] = mapped_column(Text, nullable=True)
     estado: Mapped[EstadoPrestamo] = mapped_column(
         Enum(EstadoPrestamo, name="estado_prestamo"),
-        default=EstadoPrestamo.SOLICITADO,
+        default=EstadoPrestamo.PENDIENTE,
         nullable=False,
     )
     financiador_id: Mapped[int | None] = mapped_column(ForeignKey("financiadores.id"), nullable=True)

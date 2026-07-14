@@ -9,8 +9,17 @@ from app.models.enums import DecisionEvaluacion, EstadoPrestamo
 
 class PrestamoCreate(BaseModel):
     monto_solicitado: Decimal = Field(gt=0, decimal_places=2)
-    plazo_meses: int = Field(gt=0, le=360)
-    motivo: str = Field(min_length=5, max_length=2000)
+    cantidad_cuotas: int = Field(gt=0, le=360)
+    destino: str = Field(min_length=5, max_length=2000)
+
+
+class SolicitudStaffCreate(BaseModel):
+    cliente_id: int
+    monto_solicitado: Decimal = Field(gt=0, decimal_places=2)
+    cantidad_cuotas: int = Field(gt=0, le=360)
+    tasa: Decimal = Field(ge=0, decimal_places=2)
+    destino: str = Field(min_length=5, max_length=2000)
+    observaciones: str | None = Field(default=None, max_length=2000)
 
 
 class EvaluacionResponse(BaseModel):
@@ -29,8 +38,10 @@ class PrestamoResponse(BaseModel):
     id: int
     cliente_id: int
     monto_solicitado: Decimal
-    plazo_meses: int
-    motivo: str
+    cantidad_cuotas: int
+    destino: str
+    tasa: Decimal | None
+    observaciones: str | None
     estado: EstadoPrestamo
     financiador_id: int | None
     financiera_id: int | None

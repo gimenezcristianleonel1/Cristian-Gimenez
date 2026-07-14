@@ -14,6 +14,7 @@ import { OperadorDashboard } from './pages/OperadorDashboard'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { FinanciadoresPage } from './pages/FinanciadoresPage'
 import { SimuladorPage } from './pages/SimuladorPage'
+import { SolicitudesPage } from './pages/SolicitudesPage'
 
 function AppRoutes() {
   return (
@@ -59,6 +60,16 @@ function AppRoutes() {
           <StaffProtectedRoute roles={['administrador']}>
             <StaffLayout>
               <FinanciadoresPage />
+            </StaffLayout>
+          </StaffProtectedRoute>
+        }
+      />
+      <Route
+        path="/solicitudes"
+        element={
+          <StaffProtectedRoute roles={['administrador', 'operador']}>
+            <StaffLayout>
+              <SolicitudesPage />
             </StaffLayout>
           </StaffProtectedRoute>
         }

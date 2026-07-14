@@ -7,7 +7,7 @@ class RolStaff(str, enum.Enum):
 
 
 class EstadoPrestamo(str, enum.Enum):
-    SOLICITADO = "solicitado"
+    PENDIENTE = "pendiente"
     EN_EVALUACION = "en_evaluacion"
     APROBADO = "aprobado"
     RECHAZADO = "rechazado"

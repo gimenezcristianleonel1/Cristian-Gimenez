@@ -4,7 +4,7 @@ import { api, apiErrorMessage } from '../lib/api'
 import type { Prestamo } from '../types'
 
 const ESTADO_LABEL: Record<Prestamo['estado'], string> = {
-  solicitado: 'Solicitado',
+  pendiente: 'Pendiente',
   en_evaluacion: 'En evaluación',
   aprobado: 'Aprobado',
   rechazado: 'Rechazado',
@@ -12,7 +12,7 @@ const ESTADO_LABEL: Record<Prestamo['estado'], string> = {
 }
 
 const ESTADO_COLOR: Record<Prestamo['estado'], string> = {
-  solicitado: 'bg-amber-100 text-amber-800',
+  pendiente: 'bg-amber-100 text-amber-800',
   en_evaluacion: 'bg-amber-100 text-amber-800',
   aprobado: 'bg-green-100 text-green-800',
   rechazado: 'bg-red-100 text-red-800',
@@ -23,8 +23,8 @@ export function ClienteDashboard() {
   const [prestamos, setPrestamos] = useState<Prestamo[]>([])
   const [cargando, setCargando] = useState(true)
   const [monto, setMonto] = useState('')
-  const [plazo, setPlazo] = useState('')
-  const [motivo, setMotivo] = useState('')
+  const [cuotas, setCuotas] = useState('')
+  const [destino, setDestino] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -46,12 +46,12 @@ export function ClienteDashboard() {
     try {
       await api.post('/prestamos', {
         monto_solicitado: Number(monto),
-        plazo_meses: Number(plazo),
-        motivo,
+        cantidad_cuotas: Number(cuotas),
+        destino,
       })
       setMonto('')
-      setPlazo('')
-      setMotivo('')
+      setCuotas('')
+      setDestino('')
       await cargarPrestamos()
     } catch (err) {
       setError(apiErrorMessage(err, 'No se pudo enviar la solicitud'))
@@ -83,24 +83,24 @@ export function ClienteDashboard() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Plazo (meses)</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Cantidad de cuotas</label>
             <input
               type="number"
               min="1"
               max="360"
               required
-              value={plazo}
-              onChange={(e) => setPlazo(e.target.value)}
+              value={cuotas}
+              onChange={(e) => setCuotas(e.target.value)}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-slate-700">Motivo</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Destino del préstamo</label>
             <textarea
               required
               minLength={5}
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value)}
+              value={destino}
+              onChange={(e) => setDestino(e.target.value)}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               rows={3}
             />
@@ -133,7 +133,7 @@ export function ClienteDashboard() {
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-600">
-                  {p.plazo_meses} meses · {p.motivo}
+                  {p.cantidad_cuotas} cuotas · {p.destino}
                 </p>
                 {p.evaluacion && (
                   <p className="mt-2 text-sm text-slate-500">

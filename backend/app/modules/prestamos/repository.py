@@ -15,13 +15,23 @@ class PrestamoRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, cliente_id: int, monto_solicitado: Decimal, plazo_meses: int, motivo: str) -> Prestamo:
+    def create(
+        self,
+        cliente_id: int,
+        monto_solicitado: Decimal,
+        cantidad_cuotas: int,
+        destino: str,
+        tasa: Decimal | None = None,
+        observaciones: str | None = None,
+    ) -> Prestamo:
         prestamo = Prestamo(
             cliente_id=cliente_id,
             monto_solicitado=monto_solicitado,
-            plazo_meses=plazo_meses,
-            motivo=motivo,
-            estado=EstadoPrestamo.SOLICITADO,
+            cantidad_cuotas=cantidad_cuotas,
+            destino=destino,
+            tasa=tasa,
+            observaciones=observaciones,
+            estado=EstadoPrestamo.PENDIENTE,
         )
         self.db.add(prestamo)
         self.db.commit()

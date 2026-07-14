@@ -129,6 +129,12 @@ export function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-10">
+      <div className="flex justify-end">
+        <Link to="/solicitudes" className="text-sm text-blue-600 hover:underline">
+          Ver todas las solicitudes
+        </Link>
+      </div>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <section className="rounded-lg border border-slate-200 bg-white p-6">
