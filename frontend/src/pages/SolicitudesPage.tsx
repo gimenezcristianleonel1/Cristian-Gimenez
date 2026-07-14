@@ -1,7 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { useStaffAuth } from '../auth/StaffAuthContext'
 import { api, apiErrorMessage } from '../lib/api'
-import type { Cliente, EstadoPrestamo, Prestamo } from '../types'
+import type { Cliente, DecisionEvaluacion, EstadoPrestamo, Financiador, Prestamo } from '../types'
 
 type Filtro = 'pendiente' | 'aprobado' | 'rechazado'
 
@@ -39,17 +39,23 @@ const FORM_VACIO: FormState = {
 
 export function SolicitudesPage() {
   const { staff } = useStaffAuth()
-  const puedeCrear = staff?.rol === 'administrador'
+  const esAdministrador = staff?.rol === 'administrador'
 
   const [filtro, setFiltro] = useState<Filtro>('pendiente')
   const [solicitudes, setSolicitudes] = useState<Prestamo[]>([])
   const [clientes, setClientes] = useState<Cliente[]>([])
+  const [financiadores, setFinanciadores] = useState<Financiador[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [expandidoId, setExpandidoId] = useState<number | null>(null)
 
   const [mostrarForm, setMostrarForm] = useState(false)
   const [form, setForm] = useState<FormState>(FORM_VACIO)
   const [enviando, setEnviando] = useState(false)
+
+  const [observacionesEval, setObservacionesEval] = useState<Record<number, string>>({})
+  const [financiadorSeleccionado, setFinanciadorSeleccionado] = useState<Record<number, string>>({})
+  const [procesandoId, setProcesandoId] = useState<number | null>(null)
 
   async function cargar(f: Filtro) {
     setCargando(true)
@@ -63,14 +69,20 @@ export function SolicitudesPage() {
   }, [filtro])
 
   useEffect(() => {
-    if (puedeCrear) {
+    if (esAdministrador) {
       api.get<Cliente[]>('/clientes').then(({ data }) => setClientes(data))
+      api.get<Financiador[]>('/financiadores').then(({ data }) => setFinanciadores(data.filter((f) => f.activo)))
     }
-  }, [puedeCrear])
+  }, [esAdministrador])
 
   function nombreCliente(id: number): string {
     const cliente = clientes.find((c) => c.id === id)
     return cliente ? cliente.usuario.nombre : `Cliente #${id}`
+  }
+
+  function nombreFinanciador(id: number | null): string | null {
+    if (id === null) return null
+    return financiadores.find((f) => f.id === id)?.nombre ?? `Financiador #${id}`
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -96,11 +108,56 @@ export function SolicitudesPage() {
     }
   }
 
+  function alternarExpandido(id: number) {
+    setError(null)
+    setExpandidoId((actual) => (actual === id ? null : id))
+  }
+
+  async function evaluar(prestamoId: number, decision: DecisionEvaluacion) {
+    setError(null)
+    const texto = observacionesEval[prestamoId]?.trim()
+    if (!texto || texto.length < 5) {
+      setError('Escribí una observación de al menos 5 caracteres antes de decidir')
+      return
+    }
+    setProcesandoId(prestamoId)
+    try {
+      await api.post(`/prestamos/${prestamoId}/evaluar`, { decision, observaciones: texto })
+      setExpandidoId(null)
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudo registrar la decisión'))
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
+  async function asignarFinanciador(prestamoId: number) {
+    setError(null)
+    const financiadorId = financiadorSeleccionado[prestamoId]
+    if (!financiadorId) {
+      setError('Elegí un financiador antes de asignar')
+      return
+    }
+    setProcesandoId(prestamoId)
+    try {
+      await api.post('/financiadores/asignar', {
+        prestamo_id: prestamoId,
+        financiador_id: Number(financiadorId),
+      })
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudo asignar el financiador'))
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-slate-900">Solicitudes</h1>
-        {puedeCrear && (
+        {esAdministrador && (
           <button
             onClick={() => setMostrarForm((v) => !v)}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -112,7 +169,7 @@ export function SolicitudesPage() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      {mostrarForm && puedeCrear && (
+      {mostrarForm && esAdministrador && (
         <form
           onSubmit={handleSubmit}
           className="mb-6 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-3"
@@ -193,7 +250,10 @@ export function SolicitudesPage() {
         {FILTROS.map((f) => (
           <button
             key={f.valor}
-            onClick={() => setFiltro(f.valor)}
+            onClick={() => {
+              setFiltro(f.valor)
+              setExpandidoId(null)
+            }}
             className={`rounded-md px-3 py-1.5 text-sm font-medium ${
               filtro === f.valor
                 ? 'bg-blue-600 text-white'
@@ -221,25 +281,128 @@ export function SolicitudesPage() {
                 <th className="px-4 py-2">Destino</th>
                 <th className="px-4 py-2">Fecha</th>
                 <th className="px-4 py-2">Estado</th>
+                <th className="px-4 py-2"></th>
               </tr>
             </thead>
             <tbody>
               {solicitudes.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 font-medium text-slate-900">{nombreCliente(s.cliente_id)}</td>
-                  <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
-                  <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
-                  <td className="px-4 py-2 text-slate-600">{s.tasa ? `${s.tasa}%` : '—'}</td>
-                  <td className="px-4 py-2 text-slate-600">{s.destino}</td>
-                  <td className="px-4 py-2 text-slate-600">
-                    {new Date(s.fecha_solicitud).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_COLOR[s.estado]}`}>
-                      {s.estado}
-                    </span>
-                  </td>
-                </tr>
+                <Fragment key={s.id}>
+                  <tr className="border-b border-slate-100 last:border-0">
+                    <td className="px-4 py-2 font-medium text-slate-900">{nombreCliente(s.cliente_id)}</td>
+                    <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
+                    <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
+                    <td className="px-4 py-2 text-slate-600">{s.tasa ? `${s.tasa}%` : '—'}</td>
+                    <td className="px-4 py-2 text-slate-600">{s.destino}</td>
+                    <td className="px-4 py-2 text-slate-600">
+                      {new Date(s.fecha_solicitud).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_COLOR[s.estado]}`}
+                      >
+                        {s.estado}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => alternarExpandido(s.id)}
+                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                      >
+                        {expandidoId === s.id ? 'Ocultar' : 'Ver'}
+                      </button>
+                    </td>
+                  </tr>
+                  {expandidoId === s.id && (
+                    <tr className="border-b border-slate-100 bg-slate-50">
+                      <td colSpan={8} className="px-4 py-4">
+                        <div className="flex flex-col gap-3 text-sm">
+                          {s.observaciones && (
+                            <p className="text-slate-600">
+                              <span className="font-medium">Observaciones de la solicitud:</span>{' '}
+                              {s.observaciones}
+                            </p>
+                          )}
+
+                          {s.evaluacion && (
+                            <p className="text-slate-600">
+                              <span className="font-medium">
+                                {s.estado === 'rechazado' ? 'Motivo del rechazo' : 'Observaciones de la decisión'}:
+                              </span>{' '}
+                              {s.evaluacion.observaciones} ·{' '}
+                              {new Date(s.evaluacion.fecha_evaluacion).toLocaleString()}
+                            </p>
+                          )}
+
+                          {s.estado === 'pendiente' && (
+                            <div className="flex flex-col gap-2">
+                              <textarea
+                                placeholder="Observaciones de la decisión"
+                                value={observacionesEval[s.id] ?? ''}
+                                onChange={(e) =>
+                                  setObservacionesEval({ ...observacionesEval, [s.id]: e.target.value })
+                                }
+                                rows={2}
+                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => evaluar(s.id, 'aprobado')}
+                                  disabled={procesandoId === s.id}
+                                  className="rounded-md bg-green-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                                >
+                                  Aprobar
+                                </button>
+                                <button
+                                  onClick={() => evaluar(s.id, 'rechazado')}
+                                  disabled={procesandoId === s.id}
+                                  className="rounded-md bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                                >
+                                  Rechazar
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {s.estado === 'aprobado' && s.financiador_id === null && esAdministrador && (
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={financiadorSeleccionado[s.id] ?? ''}
+                                onChange={(e) =>
+                                  setFinanciadorSeleccionado({
+                                    ...financiadorSeleccionado,
+                                    [s.id]: e.target.value,
+                                  })
+                                }
+                                className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+                              >
+                                <option value="">Elegir financiador</option>
+                                {financiadores.map((f) => (
+                                  <option key={f.id} value={f.id}>
+                                    {f.nombre} (disponible ${f.capital_disponible})
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                onClick={() => asignarFinanciador(s.id)}
+                                disabled={procesandoId === s.id}
+                                className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                              >
+                                Asignar financiador
+                              </button>
+                            </div>
+                          )}
+
+                          {s.financiador_id !== null && (
+                            <p className="text-slate-600">
+                              <span className="font-medium">Financiador asignado:</span>{' '}
+                              {nombreFinanciador(s.financiador_id)}
+                            </p>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>

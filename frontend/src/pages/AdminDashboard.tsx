@@ -1,12 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api, apiErrorMessage } from '../lib/api'
-import type { Desembolso, Financiera, FinancieraEstadisticas, Financiador, Prestamo } from '../types'
+import type { Desembolso, Financiera, FinancieraEstadisticas, Prestamo } from '../types'
 
 export function AdminDashboard() {
   const [prestamosAprobados, setPrestamosAprobados] = useState<Prestamo[]>([])
   const [financieras, setFinancieras] = useState<Financiera[]>([])
-  const [financiadores, setFinanciadores] = useState<Financiador[]>([])
   const [desembolsos, setDesembolsos] = useState<Desembolso[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,24 +21,19 @@ export function AdminDashboard() {
   const [estadisticasAbiertas, setEstadisticasAbiertas] = useState<Record<number, FinancieraEstadisticas>>({})
   const [cargandoEstadisticasId, setCargandoEstadisticasId] = useState<number | null>(null)
 
-  const [financiadorSeleccionado, setFinanciadorSeleccionado] = useState<Record<number, string>>({})
-  const [asignandoId, setAsignandoId] = useState<number | null>(null)
-
   const [montoDesembolso, setMontoDesembolso] = useState<Record<number, string>>({})
   const [metodoDesembolso, setMetodoDesembolso] = useState<Record<number, string>>({})
   const [desembolsandoId, setDesembolsandoId] = useState<number | null>(null)
 
   async function cargarTodo() {
     setCargando(true)
-    const [prestamosRes, financierasRes, financiadoresRes, desembolsosRes] = await Promise.all([
+    const [prestamosRes, financierasRes, desembolsosRes] = await Promise.all([
       api.get<Prestamo[]>('/prestamos', { params: { estado: 'aprobado' } }),
       api.get<Financiera[]>('/financieras'),
-      api.get<Financiador[]>('/financiadores'),
       api.get<Desembolso[]>('/desembolsos'),
     ])
     setPrestamosAprobados(prestamosRes.data)
     setFinancieras(financierasRes.data)
-    setFinanciadores(financiadoresRes.data.filter((f) => f.activo))
     setDesembolsos(desembolsosRes.data)
     setCargando(false)
   }
@@ -82,27 +76,6 @@ export function AdminDashboard() {
     }
   }
 
-  async function asignarFinanciador(prestamoId: number) {
-    setError(null)
-    const financiadorId = financiadorSeleccionado[prestamoId]
-    if (!financiadorId) {
-      setError('Elegí un financiador antes de asignar')
-      return
-    }
-    setAsignandoId(prestamoId)
-    try {
-      await api.post('/financiadores/asignar', {
-        prestamo_id: prestamoId,
-        financiador_id: Number(financiadorId),
-      })
-      await cargarTodo()
-    } catch (err) {
-      setError(apiErrorMessage(err, 'No se pudo asignar el financiador'))
-    } finally {
-      setAsignandoId(null)
-    }
-  }
-
   async function registrarDesembolso(prestamoId: number, montoSolicitado: string) {
     setError(null)
     const monto = montoDesembolso[prestamoId] ?? montoSolicitado
@@ -124,7 +97,6 @@ export function AdminDashboard() {
 
   if (cargando) return <p className="text-sm text-slate-500">Cargando...</p>
 
-  const pendientesDeFinanciador = prestamosAprobados.filter((p) => p.financiador_id === null)
   const pendientesDeDesembolso = prestamosAprobados.filter((p) => p.financiador_id !== null)
 
   return (
@@ -225,48 +197,13 @@ export function AdminDashboard() {
           </Link>
         </div>
         <p className="mt-2 text-sm text-slate-500">
-          Alta, edición, capital y rendimiento de cada financiador se gestionan en su propia pantalla.
+          Alta, edición, capital y rendimiento de cada financiador se gestionan en su propia pantalla. La
+          asignación de financiador a un préstamo aprobado se hace desde{' '}
+          <Link to="/solicitudes" className="text-blue-600 hover:underline">
+            Solicitudes
+          </Link>
+          .
         </p>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
-          Asignar financiador (préstamos aprobados)
-        </h2>
-        {pendientesDeFinanciador.length === 0 ? (
-          <p className="text-sm text-slate-500">No hay préstamos esperando financiador.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {pendientesDeFinanciador.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
-                <span className="flex-1 text-sm text-slate-700">
-                  Préstamo #{p.id} · Cliente #{p.cliente_id} · ${p.monto_solicitado}
-                </span>
-                <select
-                  value={financiadorSeleccionado[p.id] ?? ''}
-                  onChange={(e) =>
-                    setFinanciadorSeleccionado({ ...financiadorSeleccionado, [p.id]: e.target.value })
-                  }
-                  className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-                >
-                  <option value="">Elegir financiador</option>
-                  {financiadores.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.nombre}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => asignarFinanciador(p.id)}
-                  disabled={asignandoId === p.id}
-                  className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  Asignar
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       <section>

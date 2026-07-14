@@ -118,6 +118,16 @@ class FinanciadorService:
         if financiador is None or not financiador.activo:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financiador no disponible")
 
-        return self.prestamo_repository.asignar_financiador(
+        if financiador.capital_disponible < prestamo.monto_solicitado:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="El financiador no tiene capital disponible suficiente para este préstamo",
+            )
+
+        prestamo_asignado = self.prestamo_repository.asignar_financiador(
             prestamo, financiador_id, financiador.financiera_id
         )
+        self.repository.update(
+            financiador, capital_disponible=financiador.capital_disponible - prestamo.monto_solicitado
+        )
+        return prestamo_asignado

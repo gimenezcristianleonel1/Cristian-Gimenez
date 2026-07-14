@@ -70,7 +70,7 @@ class PrestamoService:
         return prestamo
 
     def evaluar(
-        self, prestamo_id: int, operador_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
+        self, prestamo_id: int, aprobado_por_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
     ) -> Prestamo:
         prestamo = self.repository.get_by_id(prestamo_id)
         if prestamo is None:
@@ -83,5 +83,8 @@ class PrestamoService:
             )
 
         return self.repository.registrar_evaluacion(
-            prestamo=prestamo, operador_id=operador_id, decision=decision, observaciones=observaciones
+            prestamo=prestamo,
+            aprobado_por_id=aprobado_por_id,
+            decision=decision,
+            observaciones=observaciones,
         )

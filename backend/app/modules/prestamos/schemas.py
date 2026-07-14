@@ -26,7 +26,7 @@ class EvaluacionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    operador_id: uuid.UUID
+    aprobado_por_id: uuid.UUID
     decision: DecisionEvaluacion
     observaciones: str
     fecha_evaluacion: datetime

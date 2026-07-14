@@ -36,7 +36,7 @@ export interface Cliente {
 
 export interface Evaluacion {
   id: number
-  operador_id: string
+  aprobado_por_id: string
   decision: DecisionEvaluacion
   observaciones: string
   fecha_evaluacion: string

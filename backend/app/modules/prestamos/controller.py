@@ -90,12 +90,12 @@ def obtener_prestamo(
 def evaluar_prestamo(
     prestamo_id: int,
     data: EvaluacionCreate,
-    staff: Staff = Depends(require_staff_roles(RolStaff.OPERADOR)),
+    staff: Staff = Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR)),
     service: PrestamoService = Depends(get_prestamo_service),
 ) -> PrestamoResponse:
     return service.evaluar(
         prestamo_id=prestamo_id,
-        operador_id=staff.id,
+        aprobado_por_id=staff.id,
         decision=data.decision,
         observaciones=data.observaciones,
     )

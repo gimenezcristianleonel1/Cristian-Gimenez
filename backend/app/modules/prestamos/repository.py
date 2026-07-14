@@ -56,11 +56,11 @@ class PrestamoRepository:
         return query.order_by(Prestamo.id.desc()).all()
 
     def registrar_evaluacion(
-        self, prestamo: Prestamo, operador_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
+        self, prestamo: Prestamo, aprobado_por_id: uuid.UUID, decision: DecisionEvaluacion, observaciones: str
     ) -> Prestamo:
         evaluacion = Evaluacion(
             prestamo_id=prestamo.id,
-            operador_id=operador_id,
+            aprobado_por_id=aprobado_por_id,
             decision=decision,
             observaciones=observaciones,
         )

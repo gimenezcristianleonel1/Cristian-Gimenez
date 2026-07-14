@@ -14,7 +14,9 @@ class Evaluacion(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     prestamo_id: Mapped[int] = mapped_column(ForeignKey("prestamos.id"), unique=True, nullable=False)
-    operador_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("staff.id"), nullable=False)
+    aprobado_por_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("staff.id"), nullable=False
+    )
     decision: Mapped[DecisionEvaluacion] = mapped_column(
         Enum(DecisionEvaluacion, name="decision_evaluacion"), nullable=False
     )
