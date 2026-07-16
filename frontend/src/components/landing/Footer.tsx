@@ -1,0 +1,50 @@
+import { Link } from 'react-router-dom'
+import { Landmark } from 'lucide-react'
+
+export function Footer() {
+  const anio = new Date().getFullYear()
+
+  return (
+    <footer className="bg-navy-950 text-navy-200">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-white">
+              <Landmark className="h-5 w-5 text-emerald-accent-400" aria-hidden="true" />
+              <span className="text-base font-bold">Nexo Préstamos</span>
+            </div>
+            <p className="mt-3 max-w-sm text-sm text-navy-300">
+              Nexo Préstamos es un intermediario financiero. No otorgamos créditos directamente: conectamos
+              solicitudes con financieras aliadas reguladas.
+            </p>
+          </div>
+
+          <nav aria-label="Enlaces legales" className="flex flex-col gap-2 text-sm">
+            <a href="/legal/privacidad" className="hover:text-white">
+              Políticas de privacidad
+            </a>
+            <a href="/legal/terminos" className="hover:text-white">
+              Términos y condiciones
+            </a>
+            <a href="/legal/tasas" className="hover:text-white">
+              Información sobre tasas de interés
+            </a>
+            <Link to="/staff/login" className="hover:text-white">
+              Acceso para financieras aliadas
+            </Link>
+          </nav>
+        </div>
+
+        <div className="mt-10 border-t border-white/10 pt-6 text-xs leading-relaxed text-navy-400">
+          <p>
+            Nexo Préstamos actúa exclusivamente como intermediario entre solicitantes y financieras
+            aliadas. Las tasas, montos y plazos finales son definidos por cada financiera según su
+            propia política crediticia y pueden variar según el perfil evaluado. El simulador de esta
+            página muestra valores estimados de referencia y no constituye una oferta vinculante.
+          </p>
+          <p className="mt-4">© {anio} Nexo Préstamos. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </footer>
+  )
+}

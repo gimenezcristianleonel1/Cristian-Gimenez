@@ -1,15 +1,35 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Navbar } from '../components/landing/Navbar'
+import { Hero } from '../components/landing/Hero'
+import { HowItWorks } from '../components/landing/HowItWorks'
+import { Partners } from '../components/landing/Partners'
+import { Requirements } from '../components/landing/Requirements'
+import { Faq } from '../components/landing/Faq'
+import { SolicitudSection } from '../components/landing/SolicitudSection'
+import { Footer } from '../components/landing/Footer'
 
 export function LandingPage() {
+  const [montoInicial, setMontoInicial] = useState(500_000)
+  const [cuotasInicial, setCuotasInicial] = useState(12)
+
+  function handleVerOfertas(monto: number, cuotas: number) {
+    setMontoInicial(monto)
+    setCuotasInicial(cuotas)
+    document.getElementById('solicitud')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-slate-50 px-4">
-      <h1 className="text-4xl font-semibold text-slate-900 sm:text-5xl">Nexo Préstamos</h1>
-      <Link
-        to="/login"
-        className="rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-      >
-        Comenzar
-      </Link>
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main>
+        <Hero onVerOfertas={handleVerOfertas} />
+        <HowItWorks />
+        <Partners />
+        <Requirements />
+        <SolicitudSection montoInicial={montoInicial} cuotasInicial={cuotasInicial} />
+        <Faq />
+      </main>
+      <Footer />
     </div>
   )
 }
