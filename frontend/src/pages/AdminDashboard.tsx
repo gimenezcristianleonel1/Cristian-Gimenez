@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Banknote, Building2, FileText, HandCoins, Users } from 'lucide-react'
+import { Banknote, Building2, FileText, Users } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 interface Panel {
@@ -33,13 +33,6 @@ const PANELES: Panel[] = [
     icon: Building2,
   },
   {
-    to: '/administrador/financiadores',
-    titulo: 'Financiadores',
-    descripcion: 'Alta, edición, capital y rendimiento de cada financiador.',
-    boton: 'Ver financiadores',
-    icon: HandCoins,
-  },
-  {
     to: '/administrador/desembolsos',
     titulo: 'Desembolsos',
     descripcion: 'Registrar desembolsos de préstamos aprobados y ver el historial.',
@@ -53,12 +46,12 @@ export function AdminDashboard() {
     <div className="grid gap-5 sm:grid-cols-2">
       {PANELES.map((panel) => (
         <div key={panel.to} className="flex flex-col rounded-lg border border-slate-200 bg-white p-6">
-          <panel.icon className="h-8 w-8 text-blue-600" aria-hidden="true" />
-          <h2 className="mt-3 text-lg font-semibold text-slate-900">{panel.titulo}</h2>
+          <panel.icon className="h-8 w-8 text-emerald-accent-600" aria-hidden="true" />
+          <h2 className="mt-3 text-lg font-semibold text-navy-900">{panel.titulo}</h2>
           <p className="mt-1 flex-1 text-sm text-slate-500">{panel.descripcion}</p>
           <Link
             to={panel.to}
-            className="mt-4 w-fit rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-4 w-fit rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
           >
             {panel.boton}
           </Link>

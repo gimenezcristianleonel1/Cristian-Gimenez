@@ -120,10 +120,10 @@ export function FinanciadoresPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Financiadores</h1>
+        <h1 className="text-lg font-semibold text-navy-900">Financiadores</h1>
         <button
           onClick={abrirAlta}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
         >
           Nuevo financiador
         </button>
@@ -154,14 +154,14 @@ export function FinanciadoresPage() {
             required
             value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             placeholder="Contacto"
             required
             value={form.contacto}
             onChange={(e) => setForm({ ...form, contacto: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <div>
             <label className="mb-1 block text-xs text-slate-500">Capital aportado</label>
@@ -172,7 +172,7 @@ export function FinanciadoresPage() {
               required
               value={form.capital_aportado}
               onChange={(e) => setForm({ ...form, capital_aportado: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div>
@@ -184,7 +184,7 @@ export function FinanciadoresPage() {
               required
               value={form.capital_disponible}
               onChange={(e) => setForm({ ...form, capital_disponible: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div>
@@ -196,7 +196,7 @@ export function FinanciadoresPage() {
               required
               value={form.rendimiento_acordado}
               onChange={(e) => setForm({ ...form, rendimiento_acordado: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div className="sm:col-span-3">
@@ -205,14 +205,14 @@ export function FinanciadoresPage() {
               value={form.observaciones}
               onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
               rows={2}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div className="flex gap-2 sm:col-span-3">
             <button
               type="submit"
               disabled={enviando}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
             >
               {editandoId ? 'Guardar cambios' : 'Crear financiador'}
             </button>
@@ -250,7 +250,7 @@ export function FinanciadoresPage() {
             <tbody>
               {financiadores.map((f) => (
                 <tr key={f.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 font-medium text-slate-900">{f.nombre}</td>
+                  <td className="px-4 py-2 font-medium text-navy-900">{f.nombre}</td>
                   <td className="px-4 py-2 text-slate-600">{nombreFinanciera(f.financiera_id)}</td>
                   <td className="px-4 py-2 text-slate-600">{f.contacto}</td>
                   <td className="px-4 py-2 text-slate-600">${f.capital_aportado}</td>

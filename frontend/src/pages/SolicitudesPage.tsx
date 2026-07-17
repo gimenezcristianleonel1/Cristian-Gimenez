@@ -157,11 +157,11 @@ export function SolicitudesPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Solicitudes</h1>
+        <h1 className="text-lg font-semibold text-navy-900">Solicitudes</h1>
         {esAdministrador && (
           <button
             onClick={() => setMostrarForm((v) => !v)}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
           >
             {mostrarForm ? 'Cancelar' : 'Nueva solicitud'}
           </button>
@@ -196,7 +196,7 @@ export function SolicitudesPage() {
             required
             value={form.monto_solicitado}
             onChange={(e) => setForm({ ...form, monto_solicitado: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             type="number"
@@ -206,7 +206,7 @@ export function SolicitudesPage() {
             required
             value={form.cantidad_cuotas}
             onChange={(e) => setForm({ ...form, cantidad_cuotas: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             type="number"
@@ -216,7 +216,7 @@ export function SolicitudesPage() {
             required
             value={form.tasa}
             onChange={(e) => setForm({ ...form, tasa: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <div className="sm:col-span-2">
             <input
@@ -225,7 +225,7 @@ export function SolicitudesPage() {
               minLength={5}
               value={form.destino}
               onChange={(e) => setForm({ ...form, destino: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div className="sm:col-span-3">
@@ -234,13 +234,13 @@ export function SolicitudesPage() {
               value={form.observaciones}
               onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
               rows={2}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 sm:col-span-3 sm:w-fit"
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50 sm:col-span-3 sm:w-fit"
           >
             {enviando ? 'Guardando...' : 'Guardar solicitud'}
           </button>
@@ -257,7 +257,7 @@ export function SolicitudesPage() {
             }}
             className={`rounded-md px-3 py-1.5 text-sm font-medium ${
               filtro === f.valor
-                ? 'bg-blue-600 text-white'
+                ? 'bg-emerald-accent-600 text-white'
                 : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
             }`}
           >
@@ -289,7 +289,7 @@ export function SolicitudesPage() {
               {solicitudes.map((s) => (
                 <Fragment key={s.id}>
                   <tr className="border-b border-slate-100 last:border-0">
-                    <td className="px-4 py-2 font-medium text-slate-900">{nombreCliente(s.cliente_id)}</td>
+                    <td className="px-4 py-2 font-medium text-navy-900">{nombreCliente(s.cliente_id)}</td>
                     <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
                     <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
                     <td className="px-4 py-2 text-slate-600">{s.tasa ? `${s.tasa}%` : '—'}</td>
@@ -368,7 +368,7 @@ export function SolicitudesPage() {
                                   setObservacionesEval({ ...observacionesEval, [s.id]: e.target.value })
                                 }
                                 rows={2}
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
                               />
                               <div className="flex gap-2">
                                 <button
@@ -411,7 +411,7 @@ export function SolicitudesPage() {
                               <button
                                 onClick={() => asignarFinanciador(s.id)}
                                 disabled={procesandoId === s.id}
-                                className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                                className="rounded-md bg-emerald-accent-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
                               >
                                 Asignar financiador
                               </button>

@@ -34,7 +34,7 @@ export function SimuladorPage() {
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-lg font-semibold text-slate-900">
+          <Link to="/" className="text-lg font-semibold text-navy-900">
             Nexo Préstamos
           </Link>
           <span className="text-sm text-slate-500">Simulador de préstamos</span>
@@ -42,7 +42,7 @@ export function SimuladorPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-1 text-2xl font-semibold text-slate-900">Simulador (sistema francés)</h1>
+        <h1 className="mb-1 text-2xl font-semibold text-navy-900">Simulador (sistema francés)</h1>
         <p className="mb-6 text-sm text-slate-500">
           Solo calcula valores de referencia. No solicita ni guarda ningún préstamo.
         </p>
@@ -60,7 +60,7 @@ export function SimuladorPage() {
               required
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function SimuladorPage() {
               required
               value={tasa}
               onChange={(e) => setTasa(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div>
@@ -85,14 +85,14 @@ export function SimuladorPage() {
               required
               value={cuotas}
               onChange={(e) => setCuotas(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           {error && <p className="text-sm text-red-600 sm:col-span-3">{error}</p>}
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 sm:col-span-3 sm:w-fit"
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50 sm:col-span-3 sm:w-fit"
           >
             {enviando ? 'Calculando...' : 'Calcular'}
           </button>
@@ -103,15 +103,15 @@ export function SimuladorPage() {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-lg border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase text-slate-500">Valor de cuota</p>
-                <p className="text-xl font-semibold text-slate-900">${resultado.valor_cuota}</p>
+                <p className="text-xl font-semibold text-navy-900">${resultado.valor_cuota}</p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase text-slate-500">Interés total</p>
-                <p className="text-xl font-semibold text-slate-900">${resultado.interes_total}</p>
+                <p className="text-xl font-semibold text-navy-900">${resultado.interes_total}</p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase text-slate-500">Monto final</p>
-                <p className="text-xl font-semibold text-slate-900">${resultado.monto_final}</p>
+                <p className="text-xl font-semibold text-navy-900">${resultado.monto_final}</p>
               </div>
             </div>
 
@@ -130,7 +130,7 @@ export function SimuladorPage() {
                   {resultado.tabla_amortizacion.map((c) => (
                     <tr key={c.numero_cuota} className="border-b border-slate-100 last:border-0">
                       <td className="px-4 py-2 text-slate-600">{c.numero_cuota}</td>
-                      <td className="px-4 py-2 text-slate-900">${c.cuota}</td>
+                      <td className="px-4 py-2 text-navy-900">${c.cuota}</td>
                       <td className="px-4 py-2 text-slate-600">${c.interes}</td>
                       <td className="px-4 py-2 text-slate-600">${c.amortizacion}</td>
                       <td className="px-4 py-2 text-slate-600">${c.saldo}</td>

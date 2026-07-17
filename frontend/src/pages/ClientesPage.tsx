@@ -138,13 +138,13 @@ export function ClientesPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-lg font-semibold text-slate-900">Clientes</h1>
+        <h1 className="text-lg font-semibold text-navy-900">Clientes</h1>
         <input
           type="search"
           placeholder="Buscar por nombre, DNI o email"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="w-72 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+          className="w-72 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
         />
       </div>
 
@@ -173,7 +173,7 @@ export function ClientesPage() {
                 return (
                   <Fragment key={c.id}>
                     <tr className="border-b border-slate-100 last:border-0">
-                      <td className="px-4 py-2 font-medium text-slate-900">{c.usuario.nombre}</td>
+                      <td className="px-4 py-2 font-medium text-navy-900">{c.usuario.nombre}</td>
                       <td className="px-4 py-2 text-slate-600">{c.dni}</td>
                       <td className="px-4 py-2 text-slate-600">{c.usuario.email}</td>
                       <td className="px-4 py-2 text-slate-600">{c.telefono}</td>

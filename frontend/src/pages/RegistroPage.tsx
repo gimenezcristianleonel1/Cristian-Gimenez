@@ -45,7 +45,7 @@ export function RegistroPage() {
 
   return (
     <div className="mx-auto flex min-h-[80vh] max-w-sm flex-col justify-center px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Crear cuenta de cliente</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-navy-900">Crear cuenta de cliente</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {CAMPOS.map((campo) => (
           <div key={campo.name}>
@@ -55,7 +55,7 @@ export function RegistroPage() {
               required
               value={form[campo.name]}
               onChange={(e) => setForm({ ...form, [campo.name]: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
         ))}
@@ -63,14 +63,14 @@ export function RegistroPage() {
         <button
           type="submit"
           disabled={enviando}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
         >
           {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
       </form>
       <p className="mt-4 text-sm text-slate-600">
         ¿Ya tenés cuenta?{' '}
-        <Link to="/login" className="text-blue-600 hover:underline">
+        <Link to="/login" className="text-emerald-accent-600 hover:underline">
           Iniciá sesión
         </Link>
       </p>

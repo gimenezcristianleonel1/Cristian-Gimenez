@@ -43,8 +43,8 @@ export function OperadorDashboard() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Préstamos pendientes de evaluación</h2>
-        <Link to="/solicitudes" className="text-sm text-blue-600 hover:underline">
+        <h2 className="text-lg font-semibold text-navy-900">Préstamos pendientes de evaluación</h2>
+        <Link to="/solicitudes" className="text-sm text-emerald-accent-600 hover:underline">
           Ver todas las solicitudes
         </Link>
       </div>
@@ -58,7 +58,7 @@ export function OperadorDashboard() {
           {prestamos.map((p) => (
             <div key={p.id} className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-navy-900">
                   Cliente #{p.cliente_id} · ${p.monto_solicitado}
                 </span>
                 <span className="text-sm text-slate-500">{p.cantidad_cuotas} cuotas</span>
@@ -97,7 +97,7 @@ export function OperadorDashboard() {
                 placeholder="Observaciones de la evaluación"
                 value={observaciones[p.id] ?? ''}
                 onChange={(e) => setObservaciones({ ...observaciones, [p.id]: e.target.value })}
-                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
                 rows={2}
               />
               <div className="mt-3 flex gap-2">

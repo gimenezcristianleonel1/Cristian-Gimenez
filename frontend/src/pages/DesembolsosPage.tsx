@@ -52,12 +52,12 @@ export function DesembolsosPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <h1 className="text-lg font-semibold text-slate-900">Desembolsos</h1>
+      <h1 className="text-lg font-semibold text-navy-900">Desembolsos</h1>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <section>
-        <h2 className="mb-4 text-base font-semibold text-slate-900">Registrar desembolso</h2>
+        <h2 className="mb-4 text-base font-semibold text-navy-900">Registrar desembolso</h2>
         {pendientesDeDesembolso.length === 0 ? (
           <p className="text-sm text-slate-500">No hay préstamos listos para desembolsar.</p>
         ) : (
@@ -94,7 +94,7 @@ export function DesembolsosPage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-base font-semibold text-slate-900">Historial de desembolsos</h2>
+        <h2 className="mb-4 text-base font-semibold text-navy-900">Historial de desembolsos</h2>
         {desembolsos.length === 0 ? (
           <p className="text-sm text-slate-500">Todavía no hay desembolsos registrados.</p>
         ) : (

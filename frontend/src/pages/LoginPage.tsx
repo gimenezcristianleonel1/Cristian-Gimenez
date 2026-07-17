@@ -31,7 +31,7 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-[80vh] max-w-sm flex-col justify-center px-4">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Iniciar sesión</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-navy-900">Iniciar sesión</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
@@ -40,7 +40,7 @@ export function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
         </div>
         <div>
@@ -50,27 +50,27 @@ export function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={enviando}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
         >
           {enviando ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
       <p className="mt-4 text-sm text-slate-600">
         ¿Sos cliente y no tenés cuenta?{' '}
-        <Link to="/registro" className="text-blue-600 hover:underline">
+        <Link to="/registro" className="text-emerald-accent-600 hover:underline">
           Registrate
         </Link>
       </p>
       <p className="mt-2 text-sm text-slate-600">
         ¿Sos parte del equipo?{' '}
-        <Link to="/staff/login" className="text-blue-600 hover:underline">
+        <Link to="/staff/login" className="text-emerald-accent-600 hover:underline">
           Ingresá acá
         </Link>
       </p>

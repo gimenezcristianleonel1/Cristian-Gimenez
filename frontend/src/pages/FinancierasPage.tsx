@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { api, apiErrorMessage } from '../lib/api'
 import type { Financiera, FinancieraEstadisticas } from '../types'
 
@@ -79,17 +80,25 @@ export function FinancierasPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-slate-900">Financieras</h1>
-        <button
-          onClick={() => {
-            setForm(FORM_VACIO)
-            setError(null)
-            setMostrarForm((v) => !v)
-          }}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          {mostrarForm ? 'Cancelar' : 'Nueva financiera'}
-        </button>
+        <h1 className="text-lg font-semibold text-navy-900">Financieras</h1>
+        <div className="flex gap-2">
+          <Link
+            to="/administrador/financiadores"
+            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Ver financiadores
+          </Link>
+          <button
+            onClick={() => {
+              setForm(FORM_VACIO)
+              setError(null)
+              setMostrarForm((v) => !v)
+            }}
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
+          >
+            {mostrarForm ? 'Cancelar' : 'Nueva financiera'}
+          </button>
+        </div>
       </div>
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
@@ -104,21 +113,21 @@ export function FinancierasPage() {
             required
             value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             placeholder="CUIT (ej. 30-71234567-9)"
             required
             value={form.cuit}
             onChange={(e) => setForm({ ...form, cuit: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             placeholder="Contacto"
             required
             value={form.contacto}
             onChange={(e) => setForm({ ...form, contacto: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             type="email"
@@ -126,19 +135,19 @@ export function FinancierasPage() {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <input
             placeholder="Teléfono"
             required
             value={form.telefono}
             onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
           />
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
           >
             {enviando ? 'Guardando...' : 'Agregar financiera'}
           </button>

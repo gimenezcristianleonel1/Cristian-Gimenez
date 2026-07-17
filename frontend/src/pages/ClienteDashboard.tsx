@@ -64,8 +64,8 @@ export function ClienteDashboard() {
     <div className="flex flex-col gap-8">
       <section className="rounded-lg border border-slate-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Solicitar préstamo</h2>
-          <Link to="/simulador" className="text-sm text-blue-600 hover:underline">
+          <h2 className="text-lg font-semibold text-navy-900">Solicitar préstamo</h2>
+          <Link to="/simulador" className="text-sm text-emerald-accent-600 hover:underline">
             Simular antes de solicitar
           </Link>
         </div>
@@ -79,7 +79,7 @@ export function ClienteDashboard() {
               required
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div>
@@ -91,7 +91,7 @@ export function ClienteDashboard() {
               required
               value={cuotas}
               onChange={(e) => setCuotas(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
             />
           </div>
           <div className="sm:col-span-2">
@@ -101,7 +101,7 @@ export function ClienteDashboard() {
               minLength={5}
               value={destino}
               onChange={(e) => setDestino(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
               rows={3}
             />
           </div>
@@ -109,7 +109,7 @@ export function ClienteDashboard() {
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 sm:col-span-2 sm:w-fit"
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50 sm:col-span-2 sm:w-fit"
           >
             {enviando ? 'Enviando...' : 'Enviar solicitud'}
           </button>
@@ -117,7 +117,7 @@ export function ClienteDashboard() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Mis préstamos</h2>
+        <h2 className="mb-4 text-lg font-semibold text-navy-900">Mis préstamos</h2>
         {cargando ? (
           <p className="text-sm text-slate-500">Cargando...</p>
         ) : prestamos.length === 0 ? (
@@ -127,7 +127,7 @@ export function ClienteDashboard() {
             {prestamos.map((p) => (
               <div key={p.id} className="rounded-lg border border-slate-200 bg-white p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900">${p.monto_solicitado}</span>
+                  <span className="font-medium text-navy-900">${p.monto_solicitado}</span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_COLOR[p.estado]}`}>
                     {ESTADO_LABEL[p.estado]}
                   </span>
