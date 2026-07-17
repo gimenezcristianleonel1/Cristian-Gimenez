@@ -11,6 +11,7 @@ class PrestamoCreate(BaseModel):
     monto_solicitado: Decimal = Field(gt=0, decimal_places=2)
     cantidad_cuotas: int = Field(gt=0, le=360)
     destino: str = Field(min_length=5, max_length=2000)
+    observaciones: str | None = Field(default=None, max_length=2000)
 
 
 class SolicitudStaffCreate(BaseModel):

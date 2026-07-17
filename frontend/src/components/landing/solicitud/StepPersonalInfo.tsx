@@ -6,6 +6,9 @@ interface StepPersonalInfoProps {
 }
 
 export function StepPersonalInfo({ data, onChange }: StepPersonalInfoProps) {
+  const passwordsNoCoinciden =
+    data.confirmarPassword.length > 0 && data.password !== data.confirmarPassword
+
   return (
     <fieldset className="flex flex-col gap-5">
       <legend className="sr-only">Información personal</legend>
@@ -70,6 +73,61 @@ export function StepPersonalInfo({ data, onChange }: StepPersonalInfoProps) {
           />
         </div>
       </div>
+
+      <div>
+        <label htmlFor="sol-direccion" className="text-sm font-medium text-slate-700">
+          Dirección
+        </label>
+        <input
+          id="sol-direccion"
+          type="text"
+          required
+          autoComplete="street-address"
+          value={data.direccion}
+          onChange={(e) => onChange({ direccion: e.target.value })}
+          className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-accent-500 focus:outline-none focus:ring-2 focus:ring-emerald-accent-100"
+        />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="sol-password" className="text-sm font-medium text-slate-700">
+            Contraseña
+          </label>
+          <input
+            id="sol-password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={data.password}
+            onChange={(e) => onChange({ password: e.target.value })}
+            className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-accent-500 focus:outline-none focus:ring-2 focus:ring-emerald-accent-100"
+          />
+        </div>
+        <div>
+          <label htmlFor="sol-confirmar-password" className="text-sm font-medium text-slate-700">
+            Confirmar contraseña
+          </label>
+          <input
+            id="sol-confirmar-password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            aria-invalid={passwordsNoCoinciden}
+            value={data.confirmarPassword}
+            onChange={(e) => onChange({ confirmarPassword: e.target.value })}
+            className="mt-1.5 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-accent-500 focus:outline-none focus:ring-2 focus:ring-emerald-accent-100"
+          />
+        </div>
+      </div>
+      {passwordsNoCoinciden && <p className="-mt-2 text-xs text-red-600">Las contraseñas no coinciden.</p>}
+      <p className="-mt-2 text-xs text-slate-500">
+        Con esta contraseña vas a poder ingresar más adelante a{' '}
+        <span className="font-medium text-slate-600">Iniciar sesión</span> para ver el estado de tu
+        solicitud.
+      </p>
     </fieldset>
   )
 }

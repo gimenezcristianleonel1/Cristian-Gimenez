@@ -22,7 +22,12 @@ class PrestamoService:
         return cliente.id
 
     def solicitar(
-        self, usuario_id: int, monto_solicitado: Decimal, cantidad_cuotas: int, destino: str
+        self,
+        usuario_id: int,
+        monto_solicitado: Decimal,
+        cantidad_cuotas: int,
+        destino: str,
+        observaciones: str | None = None,
     ) -> Prestamo:
         cliente_id = self._cliente_de(usuario_id)
         return self.repository.create(
@@ -30,6 +35,7 @@ class PrestamoService:
             monto_solicitado=monto_solicitado,
             cantidad_cuotas=cantidad_cuotas,
             destino=destino,
+            observaciones=observaciones,
         )
 
     def crear_por_staff(

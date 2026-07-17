@@ -1,11 +1,4 @@
-import type { SituacionLaboral, SolicitudFormData } from './types'
-
-const SITUACIONES: { value: SituacionLaboral; label: string }[] = [
-  { value: 'relacion_dependencia', label: 'Relación de dependencia' },
-  { value: 'autonomo', label: 'Autónomo' },
-  { value: 'monotributista', label: 'Monotributista' },
-  { value: 'otro', label: 'Otro' },
-]
+import { SITUACIONES_LABORALES, type SituacionLaboral, type SolicitudFormData } from './types'
 
 interface StepWorkInfoProps {
   data: SolicitudFormData
@@ -31,7 +24,7 @@ export function StepWorkInfo({ data, onChange }: StepWorkInfoProps) {
           <option value="" disabled>
             Seleccioná una opción
           </option>
-          {SITUACIONES.map((s) => (
+          {SITUACIONES_LABORALES.map((s) => (
             <option key={s.value} value={s.value}>
               {s.label}
             </option>

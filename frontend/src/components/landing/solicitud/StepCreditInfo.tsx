@@ -1,16 +1,6 @@
 import type { ChangeEvent } from 'react'
 import { formatearMonto } from '../../../lib/creditMath'
-import type { Destino, SolicitudFormData } from './types'
-
-const DESTINOS: { value: Destino; label: string }[] = [
-  { value: 'personal', label: 'Gastos personales' },
-  { value: 'vivienda', label: 'Vivienda' },
-  { value: 'vehiculo', label: 'Vehículo' },
-  { value: 'negocio', label: 'Negocio propio' },
-  { value: 'salud', label: 'Salud' },
-  { value: 'educacion', label: 'Educación' },
-  { value: 'otro', label: 'Otro' },
-]
+import { DESTINOS, type Destino, type SolicitudFormData } from './types'
 
 interface StepCreditInfoProps {
   data: SolicitudFormData

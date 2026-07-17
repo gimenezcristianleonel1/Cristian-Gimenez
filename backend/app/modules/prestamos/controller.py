@@ -34,6 +34,7 @@ def solicitar_prestamo(
         monto_solicitado=data.monto_solicitado,
         cantidad_cuotas=data.cantidad_cuotas,
         destino=data.destino,
+        observaciones=data.observaciones,
     )
 
 

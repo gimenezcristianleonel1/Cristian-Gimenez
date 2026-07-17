@@ -1,13 +1,17 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useAuth } from '../../../auth/AuthContext'
+import { api, apiErrorMessage } from '../../../lib/api'
+import type { Prestamo } from '../../../types'
 import { StepIndicator } from './StepIndicator'
 import { StepCreditInfo } from './StepCreditInfo'
 import { StepPersonalInfo } from './StepPersonalInfo'
 import { StepWorkInfo } from './StepWorkInfo'
 import { StepSearching } from './StepSearching'
 import { StepSuccess } from './StepSuccess'
-import { FORM_DATA_INICIAL, type SolicitudFormData } from './types'
+import { DESTINOS, FORM_DATA_INICIAL, SITUACIONES_LABORALES, type SolicitudFormData } from './types'
 
 type Paso = 1 | 2 | 3 | 4 | 5
 
@@ -25,7 +29,10 @@ function esPasoValido(paso: Paso, data: SolicitudFormData): boolean {
         data.nombre.trim().length > 2 &&
         data.dni.trim().length >= 7 &&
         /^\S+@\S+\.\S+$/.test(data.email) &&
-        data.telefono.trim().length >= 6
+        data.telefono.trim().length >= 6 &&
+        data.direccion.trim().length >= 5 &&
+        data.password.length >= 8 &&
+        data.password === data.confirmarPassword
       )
     case 3:
       return data.situacionLaboral !== '' && data.ingresosMensuales !== '' && data.ingresosMensuales > 0
@@ -34,7 +41,13 @@ function esPasoValido(paso: Paso, data: SolicitudFormData): boolean {
   }
 }
 
+function construirObservaciones(data: SolicitudFormData): string {
+  const situacion = SITUACIONES_LABORALES.find((s) => s.value === data.situacionLaboral)?.label
+  return `Situación laboral: ${situacion}. Ingresos mensuales estimados: ${data.ingresosMensuales}.`
+}
+
 export function MultiStepForm({ montoInicial, cuotasInicial }: MultiStepFormProps) {
+  const { iniciarSesion } = useAuth()
   const [paso, setPaso] = useState<Paso>(1)
   const [data, setData] = useState<SolicitudFormData>({
     ...FORM_DATA_INICIAL,
@@ -42,6 +55,9 @@ export function MultiStepForm({ montoInicial, cuotasInicial }: MultiStepFormProp
     cuotas: cuotasInicial,
   })
   const [intentoAvanzar, setIntentoAvanzar] = useState(false)
+  const [mensajeCarga, setMensajeCarga] = useState('')
+  const [errorEnvio, setErrorEnvio] = useState<string | null>(null)
+  const [prestamoCreado, setPrestamoCreado] = useState<Prestamo | null>(null)
 
   function actualizarData(patch: Partial<SolicitudFormData>) {
     setData((prev) => ({ ...prev, ...patch }))
@@ -61,12 +77,42 @@ export function MultiStepForm({ montoInicial, cuotasInicial }: MultiStepFormProp
     setPaso((p) => Math.max(p - 1, 1) as Paso)
   }
 
-  function enviar() {
+  async function enviar() {
     if (!esPasoValido(3, data)) {
       setIntentoAvanzar(true)
       return
     }
+    setIntentoAvanzar(false)
+    setErrorEnvio(null)
     setPaso(4)
+
+    try {
+      setMensajeCarga('Creando tu cuenta...')
+      const { data: token } = await api.post('/clientes/registro', {
+        nombre: data.nombre,
+        email: data.email,
+        password: data.password,
+        dni: data.dni,
+        telefono: data.telefono,
+        direccion: data.direccion,
+      })
+      await iniciarSesion(token.access_token)
+
+      setMensajeCarga('Registrando tu solicitud...')
+      const destinoLabel = DESTINOS.find((d) => d.value === data.destino)?.label ?? data.destino
+      const { data: prestamo } = await api.post<Prestamo>('/prestamos', {
+        monto_solicitado: data.monto,
+        cantidad_cuotas: data.cuotas,
+        destino: destinoLabel,
+        observaciones: construirObservaciones(data),
+      })
+
+      setPrestamoCreado(prestamo)
+      setPaso(5)
+    } catch (err) {
+      setErrorEnvio(apiErrorMessage(err, 'No pudimos procesar tu solicitud. Intentá nuevamente.'))
+      setPaso(3)
+    }
   }
 
   return (
@@ -88,14 +134,23 @@ export function MultiStepForm({ montoInicial, cuotasInicial }: MultiStepFormProp
           {paso === 1 && <StepCreditInfo data={data} onChange={actualizarData} />}
           {paso === 2 && <StepPersonalInfo data={data} onChange={actualizarData} />}
           {paso === 3 && <StepWorkInfo data={data} onChange={actualizarData} />}
-          {paso === 4 && <StepSearching onFinalizado={() => setPaso(5)} />}
-          {paso === 5 && <StepSuccess data={data} />}
+          {paso === 4 && <StepSearching mensaje={mensajeCarga} />}
+          {paso === 5 && prestamoCreado && <StepSuccess nombre={data.nombre} prestamo={prestamoCreado} />}
         </motion.div>
       </AnimatePresence>
 
       {intentoAvanzar && paso <= 3 && (
         <p role="alert" className="mt-4 text-sm text-red-600">
           Completá todos los campos correctamente antes de continuar.
+        </p>
+      )}
+
+      {errorEnvio && paso === 3 && (
+        <p role="alert" className="mt-4 text-sm text-red-600">
+          {errorEnvio}{' '}
+          <Link to="/login" className="font-medium underline">
+            ¿Ya tenés cuenta? Iniciá sesión
+          </Link>
         </p>
       )}
 
