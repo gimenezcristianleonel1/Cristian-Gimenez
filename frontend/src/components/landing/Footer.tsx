@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Landmark } from 'lucide-react'
+import { Landmark, MessageCircle, Phone } from 'lucide-react'
+import { TELEFONOS_ASESORES, linkWhatsapp } from '../../lib/contacto'
 
 export function Footer() {
   const anio = new Date().getFullYear()
@@ -17,6 +18,29 @@ export function Footer() {
               Nexo Préstamos es un intermediario financiero. No otorgamos créditos directamente: conectamos
               solicitudes con financieras aliadas reguladas.
             </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-white">Hablá con un asesor</h3>
+            <ul className="mt-3 flex flex-col gap-2 text-sm">
+              {TELEFONOS_ASESORES.map((tel) => (
+                <li key={tel.display} className="flex items-center gap-3">
+                  <a href={`tel:${tel.telHref}`} className="flex items-center gap-1.5 hover:text-white">
+                    <Phone className="h-4 w-4 text-emerald-accent-400" aria-hidden="true" />
+                    {tel.display}
+                  </a>
+                  <a
+                    href={linkWhatsapp(tel.whatsappDigits, 'Hola, quiero hablar con un asesor sobre un crédito.')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Escribir por WhatsApp al ${tel.display}`}
+                    className="text-emerald-accent-400 hover:text-emerald-accent-300"
+                  >
+                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <nav aria-label="Enlaces legales" className="flex flex-col gap-2 text-sm">

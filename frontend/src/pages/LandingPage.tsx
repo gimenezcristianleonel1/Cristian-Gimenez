@@ -7,6 +7,7 @@ import { Requirements } from '../components/landing/Requirements'
 import { Faq } from '../components/landing/Faq'
 import { SolicitudSection } from '../components/landing/SolicitudSection'
 import { Footer } from '../components/landing/Footer'
+import { WhatsAppButton } from '../components/landing/WhatsAppButton'
 
 export function LandingPage() {
   const [montoInicial, setMontoInicial] = useState(500_000)
@@ -30,6 +31,7 @@ export function LandingPage() {
         <Faq />
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
   )
 }
