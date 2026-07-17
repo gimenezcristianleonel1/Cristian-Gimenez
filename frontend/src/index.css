@@ -29,9 +29,21 @@ body {
 
 body,
 .bg-textured {
-  background-color: #f7f9fc;
+  background-color: #cddcee;
   background-image:
-    linear-gradient(rgba(15, 28, 48, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 28, 48, 0.05) 1px, transparent 1px);
-  background-size: 32px 32px;
+    radial-gradient(circle at 12% 15%, rgba(16, 185, 129, 0.22) 0, transparent 40%),
+    radial-gradient(circle at 88% 12%, rgba(52, 211, 153, 0.16) 0, transparent 35%),
+    radial-gradient(circle at 92% 80%, rgba(16, 185, 129, 0.18) 0, transparent 42%),
+    radial-gradient(circle at 8% 85%, rgba(52, 211, 153, 0.14) 0, transparent 38%),
+    linear-gradient(135deg, #d7e6f4 0%, #bcd0e8 55%, #a9c2e0 100%),
+    linear-gradient(rgba(15, 28, 48, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 28, 48, 0.09) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    auto,
+    auto,
+    auto,
+    34px 34px,
+    34px 34px;
 }
