@@ -17,7 +17,7 @@ supabase.auth.onAuthStateChange((_event, session) => {
 
 api.interceptors.request.use((config) => {
   const clienteToken = localStorage.getItem('token')
-  const token = staffAccessToken ?? clienteToken
+  const token = clienteToken ?? staffAccessToken
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

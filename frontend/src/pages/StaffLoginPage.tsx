@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStaffAuth } from '../auth/StaffAuthContext'
-import { api } from '../lib/api'
+import { api, apiErrorMessage } from '../lib/api'
 import type { RolStaff, Staff } from '../types'
 
 const RUTA_POR_ROL: Record<RolStaff, string> = {
@@ -21,12 +21,22 @@ export function StaffLoginPage() {
     e.preventDefault()
     setError(null)
     setEnviando(true)
+
     try {
       await iniciarSesion(email, password)
-      const { data } = await api.get<Staff>('/staff/me')
-      navigate(RUTA_POR_ROL[data.rol])
     } catch {
       setError('No se pudo iniciar sesión. Verificá tu email y contraseña.')
+      setEnviando(false)
+      return
+    }
+
+    try {
+      const { data } = await api.get<Staff>('/staff/me')
+      navigate(RUTA_POR_ROL[data.rol])
+    } catch (err) {
+      setError(
+        apiErrorMessage(err, 'Iniciaste sesión pero no pudimos cargar tu perfil de staff. Probá de nuevo.'),
+      )
     } finally {
       setEnviando(false)
     }
