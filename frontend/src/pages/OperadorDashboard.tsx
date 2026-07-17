@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, apiErrorMessage } from '../lib/api'
+import { MOTIVOS_APROBACION, MOTIVOS_RECHAZO } from '../lib/motivosEvaluacion'
 import type { DecisionEvaluacion, Prestamo } from '../types'
 
 export function OperadorDashboard() {
@@ -67,11 +68,36 @@ export function OperadorDashboard() {
               {p.observaciones && (
                 <p className="mt-1 text-xs text-slate-400">Observaciones: {p.observaciones}</p>
               )}
+              <div className="mt-3">
+                <p className="mb-1 text-xs font-medium text-slate-500">Motivos frecuentes:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {MOTIVOS_APROBACION.map((motivo) => (
+                    <button
+                      key={motivo}
+                      type="button"
+                      onClick={() => setObservaciones({ ...observaciones, [p.id]: motivo })}
+                      className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
+                    >
+                      {motivo}
+                    </button>
+                  ))}
+                  {MOTIVOS_RECHAZO.map((motivo) => (
+                    <button
+                      key={motivo}
+                      type="button"
+                      onClick={() => setObservaciones({ ...observaciones, [p.id]: motivo })}
+                      className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                    >
+                      {motivo}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea
                 placeholder="Observaciones de la evaluación"
                 value={observaciones[p.id] ?? ''}
                 onChange={(e) => setObservaciones({ ...observaciones, [p.id]: e.target.value })}
-                className="mt-3 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                 rows={2}
               />
               <div className="mt-3 flex gap-2">

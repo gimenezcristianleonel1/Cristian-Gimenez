@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { useStaffAuth } from '../auth/StaffAuthContext'
 import { api, apiErrorMessage } from '../lib/api'
+import { MOTIVOS_APROBACION, MOTIVOS_RECHAZO } from '../lib/motivosEvaluacion'
 import type { Cliente, DecisionEvaluacion, EstadoPrestamo, Financiador, Prestamo } from '../types'
 
 type Filtro = 'pendiente' | 'aprobado' | 'rechazado'
@@ -335,6 +336,31 @@ export function SolicitudesPage() {
 
                           {s.estado === 'pendiente' && (
                             <div className="flex flex-col gap-2">
+                              <div>
+                                <p className="mb-1 text-xs font-medium text-slate-500">Motivos frecuentes:</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {MOTIVOS_APROBACION.map((motivo) => (
+                                    <button
+                                      key={motivo}
+                                      type="button"
+                                      onClick={() => setObservacionesEval({ ...observacionesEval, [s.id]: motivo })}
+                                      className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
+                                    >
+                                      {motivo}
+                                    </button>
+                                  ))}
+                                  {MOTIVOS_RECHAZO.map((motivo) => (
+                                    <button
+                                      key={motivo}
+                                      type="button"
+                                      onClick={() => setObservacionesEval({ ...observacionesEval, [s.id]: motivo })}
+                                      className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                                    >
+                                      {motivo}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
                               <textarea
                                 placeholder="Observaciones de la decisión"
                                 value={observacionesEval[s.id] ?? ''}

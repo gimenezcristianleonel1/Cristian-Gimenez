@@ -10,6 +10,31 @@ const ESTADO_COLOR: Record<EstadoPrestamo, string> = {
   desembolsado: 'bg-blue-100 text-blue-800',
 }
 
+interface GruposPorPeriodo {
+  hoy: Prestamo[]
+  semana: Prestamo[]
+  mes: Prestamo[]
+  anteriores: Prestamo[]
+}
+
+function agruparPorPeriodo(solicitudes: Prestamo[]): GruposPorPeriodo {
+  const inicioHoy = new Date()
+  inicioHoy.setHours(0, 0, 0, 0)
+  const haceUnaSemana = new Date(inicioHoy)
+  haceUnaSemana.setDate(haceUnaSemana.getDate() - 7)
+  const inicioMes = new Date(inicioHoy.getFullYear(), inicioHoy.getMonth(), 1)
+
+  const grupos: GruposPorPeriodo = { hoy: [], semana: [], mes: [], anteriores: [] }
+  for (const s of solicitudes) {
+    const fecha = new Date(s.fecha_solicitud)
+    if (fecha >= inicioHoy) grupos.hoy.push(s)
+    else if (fecha >= haceUnaSemana) grupos.semana.push(s)
+    else if (fecha >= inicioMes) grupos.mes.push(s)
+    else grupos.anteriores.push(s)
+  }
+  return grupos
+}
+
 export function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [prestamos, setPrestamos] = useState<Prestamo[]>([])
@@ -38,9 +63,7 @@ export function ClientesPage() {
   }, [])
 
   function solicitudesDe(clienteId: number): Prestamo[] {
-    return prestamos
-      .filter((p) => p.cliente_id === clienteId)
-      .sort((a, b) => b.id - a.id)
+    return prestamos.filter((p) => p.cliente_id === clienteId).sort((a, b) => b.id - a.id)
   }
 
   function nombreFinanciador(id: number | null): string | null {
@@ -55,6 +78,51 @@ export function ClientesPage() {
 
   function alternarExpandido(id: number) {
     setExpandidoId((actual) => (actual === id ? null : id))
+  }
+
+  function otorgadoPor(s: Prestamo) {
+    if (s.financiador_id === null) return '—'
+    return (
+      <>
+        {nombreFinanciador(s.financiador_id)}
+        {s.financiera_id !== null && ` (${nombreFinanciera(s.financiera_id)})`}
+      </>
+    )
+  }
+
+  function TablaSolicitudes({ solicitudes }: { solicitudes: Prestamo[] }) {
+    return (
+      <div className="overflow-x-auto rounded-md border border-slate-200 bg-white">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th className="px-3 py-2">Monto</th>
+              <th className="px-3 py-2">Cuotas</th>
+              <th className="px-3 py-2">Destino</th>
+              <th className="px-3 py-2">Fecha</th>
+              <th className="px-3 py-2">Estado</th>
+              <th className="px-3 py-2">Otorgado por</th>
+            </tr>
+          </thead>
+          <tbody>
+            {solicitudes.map((s) => (
+              <tr key={s.id} className="border-b border-slate-100 last:border-0">
+                <td className="px-3 py-2 text-slate-700">${s.monto_solicitado}</td>
+                <td className="px-3 py-2 text-slate-600">{s.cantidad_cuotas}</td>
+                <td className="px-3 py-2 text-slate-600">{s.destino}</td>
+                <td className="px-3 py-2 text-slate-600">{new Date(s.fecha_solicitud).toLocaleDateString()}</td>
+                <td className="px-3 py-2">
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_COLOR[s.estado]}`}>
+                    {s.estado}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-slate-600">{otorgadoPor(s)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
   }
 
   const termino = busqueda.trim().toLowerCase()
@@ -101,6 +169,7 @@ export function ClientesPage() {
             <tbody>
               {clientesFiltrados.map((c) => {
                 const solicitudes = solicitudesDe(c.id)
+                const grupos = agruparPorPeriodo(solicitudes)
                 return (
                   <Fragment key={c.id}>
                     <tr className="border-b border-slate-100 last:border-0">
@@ -125,53 +194,43 @@ export function ClientesPage() {
                     {expandidoId === c.id && (
                       <tr className="border-b border-slate-100 bg-slate-50">
                         <td colSpan={7} className="px-4 py-4">
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-4">
                             <p className="text-sm font-medium text-slate-700">
                               Dirección: <span className="font-normal text-slate-600">{c.direccion}</span>
                             </p>
-                            <div className="overflow-x-auto rounded-md border border-slate-200 bg-white">
-                              <table className="w-full text-left text-sm">
-                                <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                                  <tr>
-                                    <th className="px-3 py-2">Monto</th>
-                                    <th className="px-3 py-2">Cuotas</th>
-                                    <th className="px-3 py-2">Destino</th>
-                                    <th className="px-3 py-2">Fecha</th>
-                                    <th className="px-3 py-2">Estado</th>
-                                    <th className="px-3 py-2">Otorgado por</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {solicitudes.map((s) => (
-                                    <tr key={s.id} className="border-b border-slate-100 last:border-0">
-                                      <td className="px-3 py-2 text-slate-700">${s.monto_solicitado}</td>
-                                      <td className="px-3 py-2 text-slate-600">{s.cantidad_cuotas}</td>
-                                      <td className="px-3 py-2 text-slate-600">{s.destino}</td>
-                                      <td className="px-3 py-2 text-slate-600">
-                                        {new Date(s.fecha_solicitud).toLocaleDateString()}
-                                      </td>
-                                      <td className="px-3 py-2">
-                                        <span
-                                          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_COLOR[s.estado]}`}
-                                        >
-                                          {s.estado}
-                                        </span>
-                                      </td>
-                                      <td className="px-3 py-2 text-slate-600">
-                                        {s.financiador_id !== null ? (
-                                          <>
-                                            {nombreFinanciador(s.financiador_id)}
-                                            {s.financiera_id !== null && ` (${nombreFinanciera(s.financiera_id)})`}
-                                          </>
-                                        ) : (
-                                          '—'
-                                        )}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
+
+                            {grupos.hoy.length > 0 && (
+                              <div>
+                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Hoy
+                                </p>
+                                <TablaSolicitudes solicitudes={grupos.hoy} />
+                              </div>
+                            )}
+                            {grupos.semana.length > 0 && (
+                              <div>
+                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Esta semana
+                                </p>
+                                <TablaSolicitudes solicitudes={grupos.semana} />
+                              </div>
+                            )}
+                            {grupos.mes.length > 0 && (
+                              <div>
+                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Este mes
+                                </p>
+                                <TablaSolicitudes solicitudes={grupos.mes} />
+                              </div>
+                            )}
+                            {grupos.anteriores.length > 0 && (
+                              <div>
+                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Anteriores
+                                </p>
+                                <TablaSolicitudes solicitudes={grupos.anteriores} />
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>

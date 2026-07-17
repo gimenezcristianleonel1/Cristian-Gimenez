@@ -42,7 +42,7 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-navy-800">
+          <Link to="/acceso" className="text-sm font-medium text-slate-600 hover:text-navy-800">
             Iniciar sesión
           </Link>
           <button
@@ -89,7 +89,7 @@ export function Navbar() {
             Solicitar crédito
           </button>
           <Link
-            to="/login"
+            to="/acceso"
             onClick={() => setMenuAbierto(false)}
             className="mt-1 block px-3 py-2.5 text-center text-sm font-medium text-slate-600 hover:text-navy-800"
           >

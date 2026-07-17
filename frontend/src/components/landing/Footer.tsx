@@ -53,8 +53,8 @@ export function Footer() {
             <a href="/legal/tasas" className="hover:text-white">
               Información sobre tasas de interés
             </a>
-            <Link to="/staff/login" className="hover:text-white">
-              Acceso para financieras aliadas
+            <Link to="/acceso" className="hover:text-white">
+              Acceso staff / administrador
             </Link>
           </nav>
         </div>
