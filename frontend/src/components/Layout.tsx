@@ -1,4 +1,8 @@
 import type { ReactNode } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+const RUTAS_PRINCIPALES = ['/administrador', '/operador', '/cliente']
 
 export function Layout({
   nombre,
@@ -11,6 +15,10 @@ export function Layout({
   onLogout: () => void
   children: ReactNode
 }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const mostrarVolver = !RUTAS_PRINCIPALES.includes(location.pathname)
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -29,7 +37,18 @@ export function Layout({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        {mostrarVolver && (
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Volver
+          </button>
+        )}
+        {children}
+      </main>
     </div>
   )
 }

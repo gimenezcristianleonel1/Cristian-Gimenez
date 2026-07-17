@@ -188,6 +188,21 @@ export function AdminDashboard() {
 
       <section className="rounded-lg border border-slate-200 bg-white p-6">
         <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">Clientes</h2>
+          <Link
+            to="/administrador/clientes"
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Ver clientes
+          </Link>
+        </div>
+        <p className="mt-2 text-sm text-slate-500">
+          Datos de cada cliente, sus solicitudes y qué financiador/financiera le otorgó cada crédito.
+        </p>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-6">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Financiadores</h2>
           <Link
             to="/administrador/financiadores"
