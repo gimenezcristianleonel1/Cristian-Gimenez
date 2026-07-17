@@ -14,7 +14,12 @@ class Settings(BaseSettings):
     environment: str = "local"
 
     # Supabase Auth: usado para verificar los JWT que emite Supabase para el
-    # staff interno (Administrador/Operador). Project Settings → API → JWT Settings.
+    # staff interno (Administrador/Operador).
+    # - supabase_url: URL del proyecto (Project Settings → API), para resolver
+    #   las claves públicas (JWKS) de proyectos con firma asimétrica (ES256/RS256).
+    # - supabase_jwt_secret: Project Settings → API → JWT Settings → JWT Secret,
+    #   solo necesario para proyectos que todavía firman con el secreto legacy (HS256).
+    supabase_url: str
     supabase_jwt_secret: str
 
     @property

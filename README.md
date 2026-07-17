@@ -47,8 +47,9 @@ Backend en `http://localhost:8000` (docs en `/docs`), frontend en `http://localh
 
 **Backend (Render):** el repo incluye `render.yaml` (Blueprint). Al crear el servicio desde este repo, Render arma la imagen con `backend/Dockerfile`, que corre las migraciones de Alembic antes de levantar la API. Variables a completar en el dashboard de Render:
 
-- `DATABASE_URL`: connection string de Supabase (Project Settings → Database → Connection string). `JWT_SECRET_KEY` se genera automáticamente.
-- `SUPABASE_JWT_SECRET`: Project Settings → API → JWT Settings → JWT Secret. Necesario para verificar los tokens del staff.
+- `DATABASE_URL`: connection string de Supabase con **connection pooling activado** (Project Settings → Database → Connection string → pestaña "Transaction pooler"; la conexión directa no funciona desde Render por IPv6). `JWT_SECRET_KEY` se genera automáticamente.
+- `SUPABASE_URL`: URL del proyecto (Project Settings → API), ej. `https://xxxxx.supabase.co`. Se usa para verificar los tokens del staff contra las claves públicas (JWKS) del proyecto.
+- `SUPABASE_JWT_SECRET`: Project Settings → API → JWT Settings → JWT Secret. Solo se usa como respaldo en proyectos con firma legacy (HS256); igual hay que completarlo porque el setting es requerido.
 - `CORS_ORIGINS`: URL del frontend en Vercel (ej. `https://nexo-prestamos.vercel.app`).
 
 **Frontend (Vercel):** importar el repo apuntando el "Root Directory" a `frontend/`. Vercel detecta Vite automáticamente; `vercel.json` agrega el rewrite necesario para que las rutas de React Router funcionen al refrescar. Variables a completar:
