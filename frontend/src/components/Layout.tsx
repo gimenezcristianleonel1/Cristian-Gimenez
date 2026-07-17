@@ -20,7 +20,7 @@ export function Layout({
   const mostrarVolver = !RUTAS_PRINCIPALES.includes(location.pathname)
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-textured">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 text-navy-900">

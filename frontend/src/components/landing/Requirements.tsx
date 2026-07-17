@@ -10,7 +10,7 @@ const REQUISITOS = [
 
 export function Requirements() {
   return (
-    <section id="requisitos" className="bg-white py-20 sm:py-24">
+    <section id="requisitos" className="bg-textured py-20 sm:py-24">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-navy-900 sm:text-4xl">

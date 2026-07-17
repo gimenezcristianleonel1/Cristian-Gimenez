@@ -24,5 +24,14 @@
 }
 
 body {
-  @apply bg-white font-sans text-slate-900 antialiased;
+  @apply font-sans text-slate-900 antialiased;
+}
+
+body,
+.bg-textured {
+  background-color: #f7f9fc;
+  background-image:
+    linear-gradient(rgba(15, 28, 48, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 28, 48, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
 }

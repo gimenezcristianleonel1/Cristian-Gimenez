@@ -21,7 +21,7 @@ const PASOS = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="bg-white py-20 sm:py-24">
+    <section id="como-funciona" className="bg-textured py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-navy-900 sm:text-4xl">
