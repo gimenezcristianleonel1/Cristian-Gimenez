@@ -17,10 +17,10 @@
 
   --color-emerald-accent-50: #ecfdf5;
   --color-emerald-accent-100: #d1fae5;
-  --color-emerald-accent-400: #34d399;
-  --color-emerald-accent-500: #10b981;
-  --color-emerald-accent-600: #059669;
-  --color-emerald-accent-700: #047857;
+  --color-emerald-accent-400: #2dd4bf;
+  --color-emerald-accent-500: #14b8a6;
+  --color-emerald-accent-600: #0f766e;
+  --color-emerald-accent-700: #134e4a;
 }
 
 body {
@@ -29,21 +29,6 @@ body {
 
 body,
 .bg-textured {
-  background-color: #cddcee;
-  background-image:
-    radial-gradient(circle at 12% 15%, rgba(16, 185, 129, 0.22) 0, transparent 40%),
-    radial-gradient(circle at 88% 12%, rgba(52, 211, 153, 0.16) 0, transparent 35%),
-    radial-gradient(circle at 92% 80%, rgba(16, 185, 129, 0.18) 0, transparent 42%),
-    radial-gradient(circle at 8% 85%, rgba(52, 211, 153, 0.14) 0, transparent 38%),
-    linear-gradient(135deg, #d7e6f4 0%, #bcd0e8 55%, #a9c2e0 100%),
-    linear-gradient(rgba(15, 28, 48, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 28, 48, 0.09) 1px, transparent 1px);
-  background-size:
-    auto,
-    auto,
-    auto,
-    auto,
-    auto,
-    34px 34px,
-    34px 34px;
+  background-color: #f8fafc;
+  background-image: linear-gradient(180deg, #f8fafc 0%, #ecfdf5 100%);
 }
