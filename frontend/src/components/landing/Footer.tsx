@@ -21,12 +21,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white">Hablá con un asesor</h3>
-            <ul className="mt-3 flex flex-col gap-2 text-sm">
+            <h3 className="text-base font-semibold text-white">Hablá con un asesor</h3>
+            <ul className="mt-4 flex flex-col gap-4">
               {TELEFONOS_ASESORES.map((tel) => (
-                <li key={tel.display} className="flex items-center gap-3">
-                  <a href={`tel:${tel.telHref}`} className="flex items-center gap-1.5 hover:text-white">
-                    <Phone className="h-4 w-4 text-emerald-accent-400" aria-hidden="true" />
+                <li key={tel.display} className="flex flex-wrap items-center gap-3">
+                  <a
+                    href={`tel:${tel.telHref}`}
+                    className="flex items-center gap-2 text-lg font-bold text-white hover:text-emerald-accent-400"
+                  >
+                    <Phone className="h-6 w-6 shrink-0 text-emerald-accent-400" aria-hidden="true" />
                     {tel.display}
                   </a>
                   <a
@@ -34,9 +37,10 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Escribir por WhatsApp al ${tel.display}`}
-                    className="text-emerald-accent-400 hover:text-emerald-accent-300"
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-accent-700"
                   >
-                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                    <MessageCircle className="h-5 w-5" aria-hidden="true" />
+                    WhatsApp
                   </a>
                 </li>
               ))}
