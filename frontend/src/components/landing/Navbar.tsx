@@ -4,6 +4,7 @@ import { Menu, X, Landmark } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
+  { href: '#nosotros', label: 'Quiénes somos' },
   { href: '#como-funciona', label: 'Cómo funciona' },
   { href: '#requisitos', label: 'Requisitos' },
   { href: '#preguntas-frecuentes', label: 'Preguntas frecuentes' },
