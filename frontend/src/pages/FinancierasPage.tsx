@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { api, apiErrorMessage } from '../lib/api'
 import type { Financiera, FinancieraEstadisticas } from '../types'
 
@@ -10,6 +11,10 @@ interface FormState {
   email: string
   telefono: string
 }
+
+type CampoOrden = 'nombre' | 'alta'
+type Direccion = 'asc' | 'desc'
+type FiltroEstado = 'todos' | 'activas' | 'inactivas'
 
 const FORM_VACIO: FormState = {
   nombre: '',
@@ -30,6 +35,12 @@ export function FinancierasPage() {
 
   const [estadisticasAbiertas, setEstadisticasAbiertas] = useState<Record<number, FinancieraEstadisticas>>({})
   const [cargandoEstadisticasId, setCargandoEstadisticasId] = useState<number | null>(null)
+
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos')
+  const [orden, setOrden] = useState<{ campo: CampoOrden; direccion: Direccion }>({
+    campo: 'nombre',
+    direccion: 'asc',
+  })
 
   async function cargar() {
     setCargando(true)
@@ -77,11 +88,45 @@ export function FinancierasPage() {
     }
   }
 
+  function alternarOrden(campo: CampoOrden) {
+    setOrden((actual) =>
+      actual.campo === campo
+        ? { campo, direccion: actual.direccion === 'asc' ? 'desc' : 'asc' }
+        : { campo, direccion: 'asc' },
+    )
+  }
+
+  function ordenarFinancieras(lista: Financiera[]): Financiera[] {
+    const factor = orden.direccion === 'asc' ? 1 : -1
+    return [...lista].sort((a, b) => {
+      if (orden.campo === 'nombre') return a.nombre.localeCompare(b.nombre) * factor
+      return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * factor
+    })
+  }
+
+  function IconoOrden({ campo }: { campo: CampoOrden }) {
+    if (orden.campo !== campo) return <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+    return orden.direccion === 'asc' ? (
+      <ArrowUp className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    )
+  }
+
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-lg font-semibold text-navy-900">Financieras</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value as FiltroEstado)}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="activas">Solo activas</option>
+            <option value="inactivas">Solo inactivas</option>
+          </select>
           <Link
             to="/administrador/financiadores"
             className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
@@ -159,33 +204,84 @@ export function FinancierasPage() {
       ) : financieras.length === 0 ? (
         <p className="text-sm text-slate-500">Todavía no hay financieras cargadas.</p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {financieras.map((f) => (
-            <div key={f.id} className="rounded-lg border border-slate-200 bg-white p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-700">
-                  {f.nombre} · CUIT {f.cuit} · {f.contacto}
-                </span>
-                <button
-                  onClick={() => verEstadisticas(f.id)}
-                  disabled={cargandoEstadisticasId === f.id}
-                  className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  {estadisticasAbiertas[f.id] ? 'Ocultar estadísticas' : 'Ver estadísticas'}
-                </button>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-1 text-xs text-slate-500">
+            Ordenar por:
+            <button
+              onClick={() => alternarOrden('nombre')}
+              className="ml-1 flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+            >
+              Nombre <IconoOrden campo="nombre" />
+            </button>
+            <button
+              onClick={() => alternarOrden('alta')}
+              className="flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+            >
+              Fecha de alta <IconoOrden campo="alta" />
+            </button>
+          </div>
+
+          {(() => {
+            const activas = ordenarFinancieras(financieras.filter((f) => f.activa))
+            const inactivas = ordenarFinancieras(financieras.filter((f) => !f.activa))
+            const grupos: { titulo: string | null; items: Financiera[] }[] =
+              filtroEstado === 'activas'
+                ? [{ titulo: null, items: activas }]
+                : filtroEstado === 'inactivas'
+                  ? [{ titulo: null, items: inactivas }]
+                  : [
+                      ...(activas.length > 0 ? [{ titulo: 'Activas', items: activas }] : []),
+                      ...(inactivas.length > 0 ? [{ titulo: 'Inactivas', items: inactivas }] : []),
+                    ]
+            const totalVisible = grupos.reduce((acc, g) => acc + g.items.length, 0)
+
+            if (totalVisible === 0) {
+              return <p className="text-sm text-slate-500">No hay financieras en este estado.</p>
+            }
+
+            return grupos.map((grupo) => (
+              <div key={grupo.titulo ?? 'todas'} className="flex flex-col gap-2">
+                {grupo.titulo && (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {grupo.titulo} ({grupo.items.length})
+                  </p>
+                )}
+                {grupo.items.map((f) => (
+                  <div key={f.id} className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-sm text-slate-700">
+                        {f.nombre} · CUIT {f.cuit} · {f.contacto}
+                        <span
+                          className={`ml-2 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            f.activa ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {f.activa ? 'Activa' : 'Inactiva'}
+                        </span>
+                      </span>
+                      <button
+                        onClick={() => verEstadisticas(f.id)}
+                        disabled={cargandoEstadisticasId === f.id}
+                        className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      >
+                        {estadisticasAbiertas[f.id] ? 'Ocultar estadísticas' : 'Ver estadísticas'}
+                      </button>
+                    </div>
+                    {estadisticasAbiertas[f.id] && (
+                      <div className="mt-3 grid gap-2 border-t border-slate-100 pt-3 text-sm text-slate-600 sm:grid-cols-3">
+                        <span>Préstamos originados: {estadisticasAbiertas[f.id].prestamos_originados}</span>
+                        <span>Monto desembolsado: ${estadisticasAbiertas[f.id].monto_total_desembolsado}</span>
+                        <span>
+                          Financiadores:{' '}
+                          {estadisticasAbiertas[f.id].financiadores.map((fdor) => fdor.nombre).join(', ') || '—'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-              {estadisticasAbiertas[f.id] && (
-                <div className="mt-3 grid gap-2 border-t border-slate-100 pt-3 text-sm text-slate-600 sm:grid-cols-3">
-                  <span>Préstamos originados: {estadisticasAbiertas[f.id].prestamos_originados}</span>
-                  <span>Monto desembolsado: ${estadisticasAbiertas[f.id].monto_total_desembolsado}</span>
-                  <span>
-                    Financiadores:{' '}
-                    {estadisticasAbiertas[f.id].financiadores.map((fdor) => fdor.nombre).join(', ') || '—'}
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
+            ))
+          })()}
         </div>
       )}
     </div>

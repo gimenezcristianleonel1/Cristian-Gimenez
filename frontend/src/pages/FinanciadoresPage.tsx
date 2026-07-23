@@ -1,6 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { api, apiErrorMessage } from '../lib/api'
 import type { Financiador, Financiera } from '../types'
+
+type CampoOrden = 'nombre' | 'alta'
+type Direccion = 'asc' | 'desc'
+type FiltroEstado = 'todos' | 'activos' | 'baja'
 
 interface FormState {
   financiera_id: string
@@ -32,6 +37,12 @@ export function FinanciadoresPage() {
   const [editandoId, setEditandoId] = useState<number | null>(null)
   const [form, setForm] = useState<FormState>(FORM_VACIO)
   const [enviando, setEnviando] = useState(false)
+
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos')
+  const [orden, setOrden] = useState<{ campo: CampoOrden; direccion: Direccion }>({
+    campo: 'nombre',
+    direccion: 'asc',
+  })
 
   async function cargar() {
     setCargando(true)
@@ -117,16 +128,52 @@ export function FinanciadoresPage() {
     }
   }
 
+  function alternarOrden(campo: CampoOrden) {
+    setOrden((actual) =>
+      actual.campo === campo
+        ? { campo, direccion: actual.direccion === 'asc' ? 'desc' : 'asc' }
+        : { campo, direccion: 'asc' },
+    )
+  }
+
+  function ordenarFinanciadores(lista: Financiador[]): Financiador[] {
+    const factor = orden.direccion === 'asc' ? 1 : -1
+    return [...lista].sort((a, b) => {
+      if (orden.campo === 'nombre') return a.nombre.localeCompare(b.nombre) * factor
+      return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * factor
+    })
+  }
+
+  function IconoOrden({ campo }: { campo: CampoOrden }) {
+    if (orden.campo !== campo) return <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+    return orden.direccion === 'asc' ? (
+      <ArrowUp className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    )
+  }
+
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-lg font-semibold text-navy-900">Financiadores</h1>
-        <button
-          onClick={abrirAlta}
-          className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
-        >
-          Nuevo financiador
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value as FiltroEstado)}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="activos">Solo activos</option>
+            <option value="baja">Solo dados de baja</option>
+          </select>
+          <button
+            onClick={abrirAlta}
+            className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700"
+          >
+            Nuevo financiador
+          </button>
+        </div>
       </div>
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
@@ -227,71 +274,104 @@ export function FinanciadoresPage() {
         </form>
       )}
 
-      {cargando ? (
-        <p className="text-sm text-slate-500">Cargando...</p>
-      ) : financiadores.length === 0 ? (
-        <p className="text-sm text-slate-500">Todavía no hay financiadores cargados.</p>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-2">Nombre</th>
-                <th className="px-4 py-2">Financiera</th>
-                <th className="px-4 py-2">Contacto</th>
-                <th className="px-4 py-2">Capital aportado</th>
-                <th className="px-4 py-2">Capital disponible</th>
-                <th className="px-4 py-2">Rendimiento</th>
-                <th className="px-4 py-2">Fecha de alta</th>
-                <th className="px-4 py-2">Estado</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {financiadores.map((f) => (
-                <tr key={f.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 font-medium text-navy-900">{f.nombre}</td>
-                  <td className="px-4 py-2 text-slate-600">{nombreFinanciera(f.financiera_id)}</td>
-                  <td className="px-4 py-2 text-slate-600">{f.contacto}</td>
-                  <td className="px-4 py-2 text-slate-600">${f.capital_aportado}</td>
-                  <td className="px-4 py-2 text-slate-600">${f.capital_disponible}</td>
-                  <td className="px-4 py-2 text-slate-600">{f.rendimiento_acordado}%</td>
-                  <td className="px-4 py-2 text-slate-600">
-                    {new Date(f.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        f.activo ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
-                      }`}
-                    >
-                      {f.activo ? 'Activo' : 'Baja'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => abrirEdicion(f)}
-                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
-                      >
-                        Editar
-                      </button>
-                      {f.activo && (
-                        <button
-                          onClick={() => darDeBaja(f.id)}
-                          className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
-                        >
-                          Dar de baja
-                        </button>
-                      )}
-                    </div>
-                  </td>
+      {(() => {
+        const activos = ordenarFinanciadores(financiadores.filter((f) => f.activo))
+        const baja = ordenarFinanciadores(financiadores.filter((f) => !f.activo))
+        const grupos: { titulo: string | null; items: Financiador[] }[] =
+          filtroEstado === 'activos'
+            ? [{ titulo: null, items: activos }]
+            : filtroEstado === 'baja'
+              ? [{ titulo: null, items: baja }]
+              : [
+                  ...(activos.length > 0 ? [{ titulo: 'Activos', items: activos }] : []),
+                  ...(baja.length > 0 ? [{ titulo: 'Dados de baja', items: baja }] : []),
+                ]
+        const totalVisible = grupos.reduce((acc, g) => acc + g.items.length, 0)
+
+        if (cargando) return <p className="text-sm text-slate-500">Cargando...</p>
+        if (totalVisible === 0) return <p className="text-sm text-slate-500">Todavía no hay financiadores cargados.</p>
+
+        return (
+          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="px-4 py-2">
+                    <button onClick={() => alternarOrden('nombre')} className="flex items-center gap-1 hover:text-navy-700">
+                      Nombre <IconoOrden campo="nombre" />
+                    </button>
+                  </th>
+                  <th className="px-4 py-2">Financiera</th>
+                  <th className="px-4 py-2">Contacto</th>
+                  <th className="px-4 py-2">Capital aportado</th>
+                  <th className="px-4 py-2">Capital disponible</th>
+                  <th className="px-4 py-2">Rendimiento</th>
+                  <th className="px-4 py-2">
+                    <button onClick={() => alternarOrden('alta')} className="flex items-center gap-1 hover:text-navy-700">
+                      Fecha de alta <IconoOrden campo="alta" />
+                    </button>
+                  </th>
+                  <th className="px-4 py-2">Estado</th>
+                  <th className="px-4 py-2">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {grupos.map((grupo) => (
+                  <Fragment key={grupo.titulo ?? 'todos'}>
+                    {grupo.titulo && (
+                      <tr>
+                        <td colSpan={9} className="bg-slate-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          {grupo.titulo} ({grupo.items.length})
+                        </td>
+                      </tr>
+                    )}
+                    {grupo.items.map((f) => (
+                      <tr key={f.id} className="border-b border-slate-100 last:border-0">
+                        <td className="px-4 py-2 font-medium text-navy-900">{f.nombre}</td>
+                        <td className="px-4 py-2 text-slate-600">{nombreFinanciera(f.financiera_id)}</td>
+                        <td className="px-4 py-2 text-slate-600">{f.contacto}</td>
+                        <td className="px-4 py-2 text-slate-600">${f.capital_aportado}</td>
+                        <td className="px-4 py-2 text-slate-600">${f.capital_disponible}</td>
+                        <td className="px-4 py-2 text-slate-600">{f.rendimiento_acordado}%</td>
+                        <td className="px-4 py-2 text-slate-600">
+                          {new Date(f.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              f.activo ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
+                            }`}
+                          >
+                            {f.activo ? 'Activo' : 'Baja'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => abrirEdicion(f)}
+                              className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                            >
+                              Editar
+                            </button>
+                            {f.activo && (
+                              <button
+                                onClick={() => darDeBaja(f.id)}
+                                className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
+                              >
+                                Dar de baja
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      })()}
     </div>
   )
 }

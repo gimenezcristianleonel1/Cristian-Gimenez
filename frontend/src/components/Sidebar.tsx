@@ -12,8 +12,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/administrador', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador'] },
-  { to: '/operador', label: 'Dashboard', icon: LayoutDashboard, roles: ['operador'] },
+  { to: '/administrador', label: 'Inicio', icon: LayoutDashboard, roles: ['administrador'] },
+  { to: '/operador', label: 'Inicio', icon: LayoutDashboard, roles: ['operador'] },
   { to: '/solicitudes', label: 'Solicitudes', icon: FileText, roles: ['administrador', 'operador'] },
   { to: '/administrador/clientes', label: 'Clientes', icon: Users, roles: ['administrador'] },
   { to: '/administrador/financieras', label: 'Financieras', icon: Building2, roles: ['administrador'] },
