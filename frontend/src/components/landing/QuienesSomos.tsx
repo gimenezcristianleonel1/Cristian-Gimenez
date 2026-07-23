@@ -25,7 +25,7 @@ export function QuienesSomos() {
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <Landmark className="mx-auto h-6 w-6 text-emerald-accent-600" aria-hidden="true" />
-            <p className="mt-2 text-sm font-medium text-navy-900">+18 años en el mercado</p>
+            <p className="mt-2 text-sm font-medium text-navy-900">+20 años en el mercado</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <Users className="mx-auto h-6 w-6 text-emerald-accent-600" aria-hidden="true" />
