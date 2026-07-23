@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Banknote, CheckCircle2, FileText, Users, XCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useStaffAuth } from '../auth/StaffAuthContext'
 import { api } from '../lib/api'
 import { formatearMonto } from '../lib/creditMath'
@@ -35,30 +36,36 @@ function saludo(): string {
   return 'Buenas noches'
 }
 
+const MotionLink = motion(Link)
+
 function StatCard({
   icon: Icon,
   etiqueta,
   valor,
   delay,
+  to,
 }: {
   icon: typeof FileText
   etiqueta: string
   valor: string
   delay: number
+  to: string
 }) {
   return (
-    <motion.div
+    <MotionLink
+      to={to}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
       transition={{ duration: 0.35, delay }}
-      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors hover:border-emerald-accent-300 hover:shadow-md"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-accent-50">
         <Icon className="h-5 w-5 text-emerald-accent-600" aria-hidden="true" />
       </div>
       <p className="mt-4 text-2xl font-bold text-navy-900">{valor}</p>
       <p className="text-sm text-slate-500">{etiqueta}</p>
-    </motion.div>
+    </MotionLink>
   )
 }
 
@@ -174,15 +181,34 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={FileText} etiqueta="Solicitudes pendientes" valor={String(stats.pendientes)} delay={0} />
-        <StatCard icon={Users} etiqueta="Clientes registrados" valor={String(clientes.length)} delay={0.05} />
+        <StatCard
+          icon={FileText}
+          etiqueta="Solicitudes pendientes"
+          valor={String(stats.pendientes)}
+          delay={0}
+          to="/solicitudes"
+        />
+        <StatCard
+          icon={Users}
+          etiqueta="Clientes registrados"
+          valor={String(clientes.length)}
+          delay={0.05}
+          to="/administrador/clientes"
+        />
         <StatCard
           icon={CheckCircle2}
           etiqueta="Créditos aprobados este mes"
           valor={formatearMonto(stats.aprobadosEsteMes)}
           delay={0.1}
+          to="/solicitudes"
         />
-        <StatCard icon={Banknote} etiqueta="Desembolsos pendientes" valor={String(stats.desembolsosPendientes)} delay={0.15} />
+        <StatCard
+          icon={Banknote}
+          etiqueta="Desembolsos pendientes"
+          valor={String(stats.desembolsosPendientes)}
+          delay={0.15}
+          to="/administrador/desembolsos"
+        />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
