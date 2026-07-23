@@ -7,13 +7,20 @@ from app.core.deps import ActorCliente, ActorStaff
 from app.models.enums import DecisionEvaluacion, EstadoPrestamo
 from app.models.prestamo import Prestamo
 from app.modules.clientes.repository import ClienteRepository
+from app.modules.financiadores.repository import FinanciadorRepository
 from app.modules.prestamos.repository import PrestamoRepository
 
 
 class PrestamoService:
-    def __init__(self, repository: PrestamoRepository, cliente_repository: ClienteRepository) -> None:
+    def __init__(
+        self,
+        repository: PrestamoRepository,
+        cliente_repository: ClienteRepository,
+        financiador_repository: FinanciadorRepository,
+    ) -> None:
         self.repository = repository
         self.cliente_repository = cliente_repository
+        self.financiador_repository = financiador_repository
 
     def _cliente_de(self, usuario_id: int) -> int:
         cliente = self.cliente_repository.get_by_usuario_id(usuario_id)
@@ -94,3 +101,23 @@ class PrestamoService:
             decision=decision,
             observaciones=observaciones,
         )
+
+    def eliminar(self, prestamo_id: int) -> None:
+        prestamo = self.repository.get_by_id(prestamo_id)
+        if prestamo is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Préstamo no encontrado")
+
+        if prestamo.estado == EstadoPrestamo.DESEMBOLSADO:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="No se puede eliminar un préstamo ya desembolsado",
+            )
+
+        if prestamo.financiador_id is not None:
+            financiador = self.financiador_repository.get_by_id(prestamo.financiador_id)
+            if financiador is not None:
+                self.financiador_repository.update(
+                    financiador, capital_disponible=financiador.capital_disponible + prestamo.monto_solicitado
+                )
+
+        self.repository.delete(prestamo)

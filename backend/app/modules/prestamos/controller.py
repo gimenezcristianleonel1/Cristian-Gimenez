@@ -7,6 +7,7 @@ from app.models.enums import EstadoPrestamo, RolStaff
 from app.models.staff import Staff
 from app.models.usuario import Usuario
 from app.modules.clientes.repository import ClienteRepository
+from app.modules.financiadores.repository import FinanciadorRepository
 from app.modules.prestamos.repository import PrestamoRepository
 from app.modules.prestamos.schemas import (
     EvaluacionCreate,
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/prestamos", tags=["prestamos"])
 
 
 def get_prestamo_service(db: Session = Depends(get_db)) -> PrestamoService:
-    return PrestamoService(PrestamoRepository(db), ClienteRepository(db))
+    return PrestamoService(PrestamoRepository(db), ClienteRepository(db), FinanciadorRepository(db))
 
 
 @router.post("", response_model=PrestamoResponse, status_code=201)
@@ -100,3 +101,14 @@ def evaluar_prestamo(
         decision=data.decision,
         observaciones=data.observaciones,
     )
+
+
+@router.delete(
+    "/{prestamo_id}",
+    status_code=204,
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
+)
+def eliminar_prestamo(
+    prestamo_id: int, service: PrestamoService = Depends(get_prestamo_service)
+) -> None:
+    service.eliminar(prestamo_id)

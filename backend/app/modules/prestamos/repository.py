@@ -88,6 +88,12 @@ class PrestamoRepository:
         self.db.refresh(prestamo)
         return prestamo
 
+    def delete(self, prestamo: Prestamo) -> None:
+        if prestamo.evaluacion is not None:
+            self.db.delete(prestamo.evaluacion)
+        self.db.delete(prestamo)
+        self.db.commit()
+
     def contar_activos_por_financiador(self, financiador_id: int) -> int:
         return (
             self.db.query(func.count(Prestamo.id))

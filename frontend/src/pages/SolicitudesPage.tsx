@@ -58,6 +58,9 @@ export function SolicitudesPage() {
   const [financiadorSeleccionado, setFinanciadorSeleccionado] = useState<Record<number, string>>({})
   const [procesandoId, setProcesandoId] = useState<number | null>(null)
 
+  const [seleccionadas, setSeleccionadas] = useState<Set<number>>(new Set())
+  const [eliminando, setEliminando] = useState(false)
+
   async function cargar(f: Filtro) {
     setCargando(true)
     const { data } = await api.get<Prestamo[]>('/prestamos', { params: { estado: f } })
@@ -67,6 +70,7 @@ export function SolicitudesPage() {
 
   useEffect(() => {
     cargar(filtro)
+    setSeleccionadas(new Set())
   }, [filtro])
 
   useEffect(() => {
@@ -133,6 +137,62 @@ export function SolicitudesPage() {
     }
   }
 
+  function toggleSeleccionada(id: number) {
+    setSeleccionadas((actual) => {
+      const copia = new Set(actual)
+      if (copia.has(id)) copia.delete(id)
+      else copia.add(id)
+      return copia
+    })
+  }
+
+  function toggleSeleccionarTodas() {
+    setSeleccionadas((actual) =>
+      actual.size === solicitudes.length ? new Set() : new Set(solicitudes.map((s) => s.id)),
+    )
+  }
+
+  async function eliminarSeleccionadas() {
+    if (seleccionadas.size === 0) return
+    if (
+      !window.confirm(
+        `¿Eliminar ${seleccionadas.size} solicitud${seleccionadas.size > 1 ? 'es' : ''} aprobada${
+          seleccionadas.size > 1 ? 's' : ''
+        }? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return
+    }
+    setError(null)
+    setEliminando(true)
+    try {
+      await Promise.all([...seleccionadas].map((id) => api.delete(`/prestamos/${id}`)))
+      setSeleccionadas(new Set())
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudieron eliminar algunas solicitudes'))
+      await cargar(filtro)
+    } finally {
+      setEliminando(false)
+    }
+  }
+
+  async function eliminarUna(id: number) {
+    if (!window.confirm('¿Eliminar esta solicitud aprobada? Esta acción no se puede deshacer.')) return
+    setError(null)
+    try {
+      await api.delete(`/prestamos/${id}`)
+      setSeleccionadas((actual) => {
+        const copia = new Set(actual)
+        copia.delete(id)
+        return copia
+      })
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudo eliminar la solicitud'))
+    }
+  }
+
   async function asignarFinanciador(prestamoId: number) {
     setError(null)
     const financiadorId = financiadorSeleccionado[prestamoId]
@@ -153,6 +213,8 @@ export function SolicitudesPage() {
       setProcesandoId(null)
     }
   }
+
+  const puedeEliminar = esAdministrador && filtro === 'aprobado'
 
   return (
     <div>
@@ -247,23 +309,34 @@ export function SolicitudesPage() {
         </form>
       )}
 
-      <div className="mb-4 flex gap-2">
-        {FILTROS.map((f) => (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
+          {FILTROS.map((f) => (
+            <button
+              key={f.valor}
+              onClick={() => {
+                setFiltro(f.valor)
+                setExpandidoId(null)
+              }}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                filtro === f.valor
+                  ? 'bg-emerald-accent-600 text-white'
+                  : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              {f.etiqueta}
+            </button>
+          ))}
+        </div>
+        {puedeEliminar && seleccionadas.size > 0 && (
           <button
-            key={f.valor}
-            onClick={() => {
-              setFiltro(f.valor)
-              setExpandidoId(null)
-            }}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-              filtro === f.valor
-                ? 'bg-emerald-accent-600 text-white'
-                : 'border border-slate-300 text-slate-700 hover:bg-slate-100'
-            }`}
+            onClick={eliminarSeleccionadas}
+            disabled={eliminando}
+            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
           >
-            {f.etiqueta}
+            {eliminando ? 'Eliminando...' : `Eliminar seleccionadas (${seleccionadas.size})`}
           </button>
-        ))}
+        )}
       </div>
 
       {cargando ? (
@@ -275,6 +348,17 @@ export function SolicitudesPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
+                {puedeEliminar && (
+                  <th className="px-4 py-2">
+                    <input
+                      type="checkbox"
+                      checked={seleccionadas.size === solicitudes.length}
+                      onChange={toggleSeleccionarTodas}
+                      aria-label="Seleccionar todas"
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                  </th>
+                )}
                 <th className="px-4 py-2">Cliente</th>
                 <th className="px-4 py-2">Monto</th>
                 <th className="px-4 py-2">Cuotas</th>
@@ -289,6 +373,17 @@ export function SolicitudesPage() {
               {solicitudes.map((s) => (
                 <Fragment key={s.id}>
                   <tr className="border-b border-slate-100 last:border-0">
+                    {puedeEliminar && (
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={seleccionadas.has(s.id)}
+                          onChange={() => toggleSeleccionada(s.id)}
+                          aria-label={`Seleccionar solicitud de ${nombreCliente(s.cliente_id)}`}
+                          className="h-4 w-4 rounded border-slate-300"
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-2 font-medium text-navy-900">{nombreCliente(s.cliente_id)}</td>
                     <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
                     <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
@@ -305,17 +400,27 @@ export function SolicitudesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2">
-                      <button
-                        onClick={() => alternarExpandido(s.id)}
-                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
-                      >
-                        {expandidoId === s.id ? 'Ocultar' : 'Ver'}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => alternarExpandido(s.id)}
+                          className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                        >
+                          {expandidoId === s.id ? 'Ocultar' : 'Ver'}
+                        </button>
+                        {puedeEliminar && (
+                          <button
+                            onClick={() => eliminarUna(s.id)}
+                            className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   {expandidoId === s.id && (
                     <tr className="border-b border-slate-100 bg-slate-50">
-                      <td colSpan={8} className="px-4 py-4">
+                      <td colSpan={puedeEliminar ? 9 : 8} className="px-4 py-4">
                         <div className="flex flex-col gap-3 text-sm">
                           {s.observaciones && (
                             <p className="text-slate-600">
