@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState, type FormEvent } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { api, apiErrorMessage } from '../lib/api'
 import type { Cliente, EstadoPrestamo, Financiador, Financiera, Prestamo } from '../types'
 
@@ -9,6 +10,10 @@ interface FormState {
   telefono: string
   direccion: string
 }
+
+type CampoOrden = 'nombre' | 'alta'
+type Direccion = 'asc' | 'desc'
+type FiltroEstado = 'todos' | 'activos' | 'baja'
 
 const ESTADO_COLOR: Record<EstadoPrestamo, string> = {
   pendiente: 'bg-amber-100 text-amber-800',
@@ -51,6 +56,11 @@ export function ClientesPage() {
   const [cargando, setCargando] = useState(true)
   const [busqueda, setBusqueda] = useState('')
   const [expandidoId, setExpandidoId] = useState<number | null>(null)
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos')
+  const [orden, setOrden] = useState<{ campo: CampoOrden; direccion: Direccion }>({
+    campo: 'nombre',
+    direccion: 'asc',
+  })
 
   const [editando, setEditando] = useState<Cliente | null>(null)
   const [form, setForm] = useState<FormState>({ nombre: '', email: '', dni: '', telefono: '', direccion: '' })
@@ -140,6 +150,31 @@ export function ClientesPage() {
     setExpandidoId((actual) => (actual === id ? null : id))
   }
 
+  function alternarOrden(campo: CampoOrden) {
+    setOrden((actual) =>
+      actual.campo === campo
+        ? { campo, direccion: actual.direccion === 'asc' ? 'desc' : 'asc' }
+        : { campo, direccion: 'asc' },
+    )
+  }
+
+  function ordenarClientes(lista: Cliente[]): Cliente[] {
+    const factor = orden.direccion === 'asc' ? 1 : -1
+    return [...lista].sort((a, b) => {
+      if (orden.campo === 'nombre') return a.usuario.nombre.localeCompare(b.usuario.nombre) * factor
+      return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * factor
+    })
+  }
+
+  function IconoOrden({ campo }: { campo: CampoOrden }) {
+    if (orden.campo !== campo) return <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+    return orden.direccion === 'asc' ? (
+      <ArrowUp className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5 text-emerald-accent-600" aria-hidden="true" />
+    )
+  }
+
   function otorgadoPor(s: Prestamo) {
     if (s.financiador_id === null) return '—'
     return (
@@ -186,7 +221,7 @@ export function ClientesPage() {
   }
 
   const termino = busqueda.trim().toLowerCase()
-  const clientesFiltrados = clientes.filter((c) => {
+  const clientesBuscados = clientes.filter((c) => {
     if (!termino) return true
     return (
       c.usuario.nombre.toLowerCase().includes(termino) ||
@@ -195,137 +230,191 @@ export function ClientesPage() {
     )
   })
 
+  const activos = ordenarClientes(clientesBuscados.filter((c) => c.usuario.activo))
+  const baja = ordenarClientes(clientesBuscados.filter((c) => !c.usuario.activo))
+
+  const grupos: { titulo: string | null; clientes: Cliente[] }[] =
+    filtroEstado === 'activos'
+      ? [{ titulo: null, clientes: activos }]
+      : filtroEstado === 'baja'
+        ? [{ titulo: null, clientes: baja }]
+        : [
+            ...(activos.length > 0 ? [{ titulo: 'Activos', clientes: activos }] : []),
+            ...(baja.length > 0 ? [{ titulo: 'Dados de baja', clientes: baja }] : []),
+          ]
+
+  const totalVisible = grupos.reduce((acc, g) => acc + g.clientes.length, 0)
+
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-lg font-semibold text-navy-900">Clientes</h1>
-        <input
-          type="search"
-          placeholder="Buscar por nombre, DNI o email"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="w-72 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value as FiltroEstado)}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="activos">Solo activos</option>
+            <option value="baja">Solo dados de baja</option>
+          </select>
+          <input
+            type="search"
+            placeholder="Buscar por nombre, DNI o email"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="w-72 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+          />
+        </div>
       </div>
 
       {errorAccion && <p className="mb-4 text-sm text-red-600">{errorAccion}</p>}
 
       {cargando ? (
         <p className="text-sm text-slate-500">Cargando...</p>
-      ) : clientesFiltrados.length === 0 ? (
+      ) : totalVisible === 0 ? (
         <p className="text-sm text-slate-500">No se encontraron clientes.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                <th className="px-4 py-2">Nombre</th>
+                <th className="px-4 py-2">
+                  <button
+                    onClick={() => alternarOrden('nombre')}
+                    className="flex items-center gap-1 hover:text-navy-700"
+                  >
+                    Nombre <IconoOrden campo="nombre" />
+                  </button>
+                </th>
                 <th className="px-4 py-2">DNI</th>
                 <th className="px-4 py-2">Email</th>
                 <th className="px-4 py-2">Teléfono</th>
-                <th className="px-4 py-2">Alta</th>
+                <th className="px-4 py-2">
+                  <button
+                    onClick={() => alternarOrden('alta')}
+                    className="flex items-center gap-1 hover:text-navy-700"
+                  >
+                    Alta <IconoOrden campo="alta" />
+                  </button>
+                </th>
                 <th className="px-4 py-2">Estado</th>
                 <th className="px-4 py-2">Solicitudes</th>
                 <th className="px-4 py-2">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {clientesFiltrados.map((c) => {
-                const solicitudes = solicitudesDe(c.id)
-                const grupos = agruparPorPeriodo(solicitudes)
-                return (
-                  <Fragment key={c.id}>
-                    <tr className="border-b border-slate-100 last:border-0">
-                      <td className="px-4 py-2 font-medium text-navy-900">{c.usuario.nombre}</td>
-                      <td className="px-4 py-2 text-slate-600">{c.dni}</td>
-                      <td className="px-4 py-2 text-slate-600">{c.usuario.email}</td>
-                      <td className="px-4 py-2 text-slate-600">{c.telefono}</td>
-                      <td className="px-4 py-2 text-slate-600">
-                        {new Date(c.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            c.usuario.activo ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
-                          }`}
-                        >
-                          {c.usuario.activo ? 'Activo' : 'Baja'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 text-slate-600">{solicitudes.length}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => alternarExpandido(c.id)}
-                            disabled={solicitudes.length === 0}
-                            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            {expandidoId === c.id ? 'Ocultar' : 'Ver solicitudes'}
-                          </button>
-                          <button
-                            onClick={() => abrirEdicion(c)}
-                            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
-                          >
-                            Editar
-                          </button>
-                          {c.usuario.activo && (
-                            <button
-                              onClick={() => eliminarCliente(c)}
-                              className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
-                            >
-                              Eliminar
-                            </button>
-                          )}
-                        </div>
+              {grupos.map((grupo) => (
+                <Fragment key={grupo.titulo ?? 'todos'}>
+                  {grupo.titulo && (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="bg-slate-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                      >
+                        {grupo.titulo} ({grupo.clientes.length})
                       </td>
                     </tr>
-                    {expandidoId === c.id && (
-                      <tr className="border-b border-slate-100 bg-slate-50">
-                        <td colSpan={8} className="px-4 py-4">
-                          <div className="flex flex-col gap-4">
-                            <p className="text-sm font-medium text-slate-700">
-                              Dirección: <span className="font-normal text-slate-600">{c.direccion}</span>
-                            </p>
+                  )}
+                  {grupo.clientes.map((c) => {
+                    const solicitudes = solicitudesDe(c.id)
+                    const grupoSolicitudes = agruparPorPeriodo(solicitudes)
+                    return (
+                      <Fragment key={c.id}>
+                        <tr className="border-b border-slate-100 last:border-0">
+                          <td className="px-4 py-2 font-medium text-navy-900">{c.usuario.nombre}</td>
+                          <td className="px-4 py-2 text-slate-600">{c.dni}</td>
+                          <td className="px-4 py-2 text-slate-600">{c.usuario.email}</td>
+                          <td className="px-4 py-2 text-slate-600">{c.telefono}</td>
+                          <td className="px-4 py-2 text-slate-600">
+                            {new Date(c.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-2">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                c.usuario.activo ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
+                              }`}
+                            >
+                              {c.usuario.activo ? 'Activo' : 'Baja'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-slate-600">{solicitudes.length}</td>
+                          <td className="px-4 py-2">
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => alternarExpandido(c.id)}
+                                disabled={solicitudes.length === 0}
+                                className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                {expandidoId === c.id ? 'Ocultar' : 'Ver solicitudes'}
+                              </button>
+                              <button
+                                onClick={() => abrirEdicion(c)}
+                                className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                              >
+                                Editar
+                              </button>
+                              {c.usuario.activo && (
+                                <button
+                                  onClick={() => eliminarCliente(c)}
+                                  className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
+                                >
+                                  Eliminar
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                        {expandidoId === c.id && (
+                          <tr className="border-b border-slate-100 bg-slate-50">
+                            <td colSpan={8} className="px-4 py-4">
+                              <div className="flex flex-col gap-4">
+                                <p className="text-sm font-medium text-slate-700">
+                                  Dirección: <span className="font-normal text-slate-600">{c.direccion}</span>
+                                </p>
 
-                            {grupos.hoy.length > 0 && (
-                              <div>
-                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                  Hoy
-                                </p>
-                                <TablaSolicitudes solicitudes={grupos.hoy} />
+                                {grupoSolicitudes.hoy.length > 0 && (
+                                  <div>
+                                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                      Hoy
+                                    </p>
+                                    <TablaSolicitudes solicitudes={grupoSolicitudes.hoy} />
+                                  </div>
+                                )}
+                                {grupoSolicitudes.semana.length > 0 && (
+                                  <div>
+                                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                      Esta semana
+                                    </p>
+                                    <TablaSolicitudes solicitudes={grupoSolicitudes.semana} />
+                                  </div>
+                                )}
+                                {grupoSolicitudes.mes.length > 0 && (
+                                  <div>
+                                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                      Este mes
+                                    </p>
+                                    <TablaSolicitudes solicitudes={grupoSolicitudes.mes} />
+                                  </div>
+                                )}
+                                {grupoSolicitudes.anteriores.length > 0 && (
+                                  <div>
+                                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                      Anteriores
+                                    </p>
+                                    <TablaSolicitudes solicitudes={grupoSolicitudes.anteriores} />
+                                  </div>
+                                )}
                               </div>
-                            )}
-                            {grupos.semana.length > 0 && (
-                              <div>
-                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                  Esta semana
-                                </p>
-                                <TablaSolicitudes solicitudes={grupos.semana} />
-                              </div>
-                            )}
-                            {grupos.mes.length > 0 && (
-                              <div>
-                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                  Este mes
-                                </p>
-                                <TablaSolicitudes solicitudes={grupos.mes} />
-                              </div>
-                            )}
-                            {grupos.anteriores.length > 0 && (
-                              <div>
-                                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                  Anteriores
-                                </p>
-                                <TablaSolicitudes solicitudes={grupos.anteriores} />
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                )
-              })}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    )
+                  })}
+                </Fragment>
+              ))}
             </tbody>
           </table>
         </div>
