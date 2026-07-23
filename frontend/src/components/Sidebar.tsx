@@ -1,7 +1,8 @@
-import { Banknote, Building2, FileText, Landmark, LayoutDashboard, Users, X } from 'lucide-react'
+import { Banknote, Building2, FileText, LayoutDashboard, Users, X } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import type { ComponentType } from 'react'
 import type { RolStaff } from '../types'
+import nexoIcon from '../assets/nexo-icon.png'
 
 interface NavItem {
   to: string
@@ -45,7 +46,7 @@ export function Sidebar({ rol, abierto, onCerrar }: SidebarProps) {
       >
         <div className="flex items-center justify-between px-5 py-5">
           <Link to="/" className="flex items-center gap-2 text-navy-900">
-            <Landmark className="h-6 w-6 text-emerald-accent-600" aria-hidden="true" />
+            <img src={nexoIcon} alt="" className="h-9 w-9" aria-hidden="true" />
             <span className="text-lg font-bold tracking-tight">Nexo Préstamos</span>
           </Link>
           <button

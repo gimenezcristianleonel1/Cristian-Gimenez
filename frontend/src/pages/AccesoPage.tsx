@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
-import { Landmark, Users, ShieldCheck } from 'lucide-react'
+import { Users, ShieldCheck } from 'lucide-react'
+import nexoLogo from '../assets/nexo-logo.png'
 
 export function AccesoPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-12">
       <div className="mb-10 text-center">
-        <Link to="/" className="inline-flex items-center gap-2 text-navy-900">
-          <Landmark className="h-6 w-6 text-emerald-accent-600" aria-hidden="true" />
-          <span className="text-lg font-bold">Nexo Préstamos</span>
+        <Link to="/" className="inline-flex items-center">
+          <img src={nexoLogo} alt="Nexo Préstamos" className="h-24 w-auto" />
         </Link>
         <h1 className="mt-6 text-2xl font-bold text-slate-900">¿Cómo querés ingresar?</h1>
         <p className="mt-2 text-sm text-slate-500">Elegí la opción que corresponde a tu cuenta.</p>

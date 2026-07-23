@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, Landmark } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import nexoIcon from '../../assets/nexo-icon.png'
 
 const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
@@ -25,7 +26,7 @@ export function Navbar() {
         className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
       >
         <a href="#inicio" className="flex items-center gap-2 text-navy-900">
-          <Landmark className="h-6 w-6 text-emerald-accent-600" aria-hidden="true" />
+          <img src={nexoIcon} alt="" className="h-9 w-9" aria-hidden="true" />
           <span className="text-lg font-bold tracking-tight">Nexo Préstamos</span>
         </a>
 

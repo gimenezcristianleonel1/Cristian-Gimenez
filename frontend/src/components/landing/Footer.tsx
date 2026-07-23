@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Landmark, MessageCircle, Phone } from 'lucide-react'
+import { MessageCircle, Phone } from 'lucide-react'
 import { TELEFONOS_ASESORES, linkWhatsapp } from '../../lib/contacto'
+import nexoIcon from '../../assets/nexo-icon.png'
 
 export function Footer() {
   const anio = new Date().getFullYear()
@@ -11,7 +12,7 @@ export function Footer() {
         <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
           <div>
             <div className="flex items-center gap-2 text-white">
-              <Landmark className="h-5 w-5 text-emerald-accent-400" aria-hidden="true" />
+              <img src={nexoIcon} alt="" className="h-8 w-8" aria-hidden="true" />
               <span className="text-base font-bold">Nexo Préstamos</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-navy-300">
