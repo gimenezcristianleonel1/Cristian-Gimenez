@@ -10,7 +10,7 @@ from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.schemas import TokenResponse
 from app.modules.auth.service import AuthService
 from app.modules.clientes.repository import ClienteRepository
-from app.modules.clientes.schemas import ClienteRegistro, ClienteResponse
+from app.modules.clientes.schemas import ClienteRegistro, ClienteResponse, ClienteUpdate
 from app.modules.clientes.service import ClienteService
 
 router = APIRouter(prefix="/clientes", tags=["clientes"])
@@ -62,3 +62,34 @@ def obtener_cliente(
     cliente_id: int, service: ClienteService = Depends(get_cliente_service)
 ) -> ClienteResponse:
     return service.obtener_por_id(cliente_id)
+
+
+@router.put(
+    "/{cliente_id}",
+    response_model=ClienteResponse,
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
+)
+def editar_cliente(
+    cliente_id: int,
+    data: ClienteUpdate,
+    service: ClienteService = Depends(get_cliente_service),
+) -> ClienteResponse:
+    return service.actualizar(
+        cliente_id,
+        nombre=data.nombre,
+        email=data.email,
+        dni=data.dni,
+        telefono=data.telefono,
+        direccion=data.direccion,
+    )
+
+
+@router.delete(
+    "/{cliente_id}",
+    response_model=ClienteResponse,
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR))],
+)
+def eliminar_cliente(
+    cliente_id: int, service: ClienteService = Depends(get_cliente_service)
+) -> ClienteResponse:
+    return service.eliminar(cliente_id)

@@ -1,6 +1,14 @@
-import { Fragment, useEffect, useState } from 'react'
-import { api } from '../lib/api'
+import { Fragment, useEffect, useState, type FormEvent } from 'react'
+import { api, apiErrorMessage } from '../lib/api'
 import type { Cliente, EstadoPrestamo, Financiador, Financiera, Prestamo } from '../types'
+
+interface FormState {
+  nombre: string
+  email: string
+  dni: string
+  telefono: string
+  direccion: string
+}
 
 const ESTADO_COLOR: Record<EstadoPrestamo, string> = {
   pendiente: 'bg-amber-100 text-amber-800',
@@ -44,23 +52,75 @@ export function ClientesPage() {
   const [busqueda, setBusqueda] = useState('')
   const [expandidoId, setExpandidoId] = useState<number | null>(null)
 
+  const [editando, setEditando] = useState<Cliente | null>(null)
+  const [form, setForm] = useState<FormState>({ nombre: '', email: '', dni: '', telefono: '', direccion: '' })
+  const [guardando, setGuardando] = useState(false)
+  const [errorForm, setErrorForm] = useState<string | null>(null)
+  const [errorAccion, setErrorAccion] = useState<string | null>(null)
+
+  async function cargar() {
+    setCargando(true)
+    const [clientesRes, prestamosRes, financiadoresRes, financierasRes] = await Promise.all([
+      api.get<Cliente[]>('/clientes'),
+      api.get<Prestamo[]>('/prestamos'),
+      api.get<Financiador[]>('/financiadores'),
+      api.get<Financiera[]>('/financieras'),
+    ])
+    setClientes(clientesRes.data)
+    setPrestamos(prestamosRes.data)
+    setFinanciadores(financiadoresRes.data)
+    setFinancieras(financierasRes.data)
+    setCargando(false)
+  }
+
   useEffect(() => {
-    async function cargar() {
-      setCargando(true)
-      const [clientesRes, prestamosRes, financiadoresRes, financierasRes] = await Promise.all([
-        api.get<Cliente[]>('/clientes'),
-        api.get<Prestamo[]>('/prestamos'),
-        api.get<Financiador[]>('/financiadores'),
-        api.get<Financiera[]>('/financieras'),
-      ])
-      setClientes(clientesRes.data)
-      setPrestamos(prestamosRes.data)
-      setFinanciadores(financiadoresRes.data)
-      setFinancieras(financierasRes.data)
-      setCargando(false)
-    }
     cargar()
   }, [])
+
+  function abrirEdicion(c: Cliente) {
+    setEditando(c)
+    setForm({
+      nombre: c.usuario.nombre,
+      email: c.usuario.email,
+      dni: c.dni,
+      telefono: c.telefono,
+      direccion: c.direccion,
+    })
+    setErrorForm(null)
+  }
+
+  function cerrarEdicion() {
+    setEditando(null)
+  }
+
+  async function handleGuardar(e: FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    setErrorForm(null)
+    setGuardando(true)
+    try {
+      await api.put(`/clientes/${editando.id}`, form)
+      cerrarEdicion()
+      await cargar()
+    } catch (err) {
+      setErrorForm(apiErrorMessage(err, 'No se pudo guardar el cliente'))
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function eliminarCliente(c: Cliente) {
+    if (!window.confirm(`¿Dar de baja a ${c.usuario.nombre}? No va a poder iniciar sesión, pero se conserva su historial.`)) {
+      return
+    }
+    setErrorAccion(null)
+    try {
+      await api.delete(`/clientes/${c.id}`)
+      await cargar()
+    } catch (err) {
+      setErrorAccion(apiErrorMessage(err, 'No se pudo dar de baja al cliente'))
+    }
+  }
 
   function solicitudesDe(clienteId: number): Prestamo[] {
     return prestamos.filter((p) => p.cliente_id === clienteId).sort((a, b) => b.id - a.id)
@@ -148,6 +208,8 @@ export function ClientesPage() {
         />
       </div>
 
+      {errorAccion && <p className="mb-4 text-sm text-red-600">{errorAccion}</p>}
+
       {cargando ? (
         <p className="text-sm text-slate-500">Cargando...</p>
       ) : clientesFiltrados.length === 0 ? (
@@ -162,8 +224,9 @@ export function ClientesPage() {
                 <th className="px-4 py-2">Email</th>
                 <th className="px-4 py-2">Teléfono</th>
                 <th className="px-4 py-2">Alta</th>
+                <th className="px-4 py-2">Estado</th>
                 <th className="px-4 py-2">Solicitudes</th>
-                <th className="px-4 py-2"></th>
+                <th className="px-4 py-2">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -180,20 +243,45 @@ export function ClientesPage() {
                       <td className="px-4 py-2 text-slate-600">
                         {new Date(c.created_at).toLocaleDateString()}
                       </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            c.usuario.activo ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {c.usuario.activo ? 'Activo' : 'Baja'}
+                        </span>
+                      </td>
                       <td className="px-4 py-2 text-slate-600">{solicitudes.length}</td>
                       <td className="px-4 py-2">
-                        <button
-                          onClick={() => alternarExpandido(c.id)}
-                          disabled={solicitudes.length === 0}
-                          className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          {expandidoId === c.id ? 'Ocultar' : 'Ver solicitudes'}
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => alternarExpandido(c.id)}
+                            disabled={solicitudes.length === 0}
+                            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {expandidoId === c.id ? 'Ocultar' : 'Ver solicitudes'}
+                          </button>
+                          <button
+                            onClick={() => abrirEdicion(c)}
+                            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                          >
+                            Editar
+                          </button>
+                          {c.usuario.activo && (
+                            <button
+                              onClick={() => eliminarCliente(c)}
+                              className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
+                            >
+                              Eliminar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                     {expandidoId === c.id && (
                       <tr className="border-b border-slate-100 bg-slate-50">
-                        <td colSpan={7} className="px-4 py-4">
+                        <td colSpan={8} className="px-4 py-4">
                           <div className="flex flex-col gap-4">
                             <p className="text-sm font-medium text-slate-700">
                               Dirección: <span className="font-normal text-slate-600">{c.direccion}</span>
@@ -240,6 +328,81 @@ export function ClientesPage() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {editando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
+            <h2 className="text-base font-semibold text-navy-900">Editar cliente</h2>
+            <form onSubmit={handleGuardar} className="mt-4 flex flex-col gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Nombre</label>
+                <input
+                  required
+                  value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">DNI</label>
+                <input
+                  required
+                  value={form.dni}
+                  onChange={(e) => setForm({ ...form, dni: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Teléfono</label>
+                <input
+                  required
+                  value={form.telefono}
+                  onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Dirección</label>
+                <input
+                  required
+                  value={form.direccion}
+                  onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                />
+              </div>
+
+              {errorForm && <p className="text-sm text-red-600">{errorForm}</p>}
+
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="submit"
+                  disabled={guardando}
+                  className="rounded-md bg-emerald-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-accent-700 disabled:opacity-50"
+                >
+                  Guardar cambios
+                </button>
+                <button
+                  type="button"
+                  onClick={cerrarEdicion}
+                  className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

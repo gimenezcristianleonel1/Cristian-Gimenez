@@ -14,6 +14,14 @@ class ClienteRegistro(BaseModel):
     direccion: str = Field(min_length=5, max_length=255)
 
 
+class ClienteUpdate(BaseModel):
+    nombre: str | None = Field(default=None, min_length=2, max_length=150)
+    email: EmailStr | None = None
+    dni: str | None = Field(default=None, min_length=5, max_length=20)
+    telefono: str | None = Field(default=None, min_length=5, max_length=30)
+    direccion: str | None = Field(default=None, min_length=5, max_length=255)
+
+
 class ClienteResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

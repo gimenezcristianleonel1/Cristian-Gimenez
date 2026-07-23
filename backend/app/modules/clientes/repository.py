@@ -25,3 +25,20 @@ class ClienteRepository:
         self.db.commit()
         self.db.refresh(cliente)
         return cliente
+
+    def update(
+        self,
+        cliente: Cliente,
+        dni: str | None = None,
+        telefono: str | None = None,
+        direccion: str | None = None,
+    ) -> Cliente:
+        if dni is not None:
+            cliente.dni = dni
+        if telefono is not None:
+            cliente.telefono = telefono
+        if direccion is not None:
+            cliente.direccion = direccion
+        self.db.commit()
+        self.db.refresh(cliente)
+        return cliente
