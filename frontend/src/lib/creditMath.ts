@@ -1,9 +1,10 @@
 /**
  * Tasa mensual estimada usada únicamente para la previsualización del simulador
  * del Hero. Es un valor de referencia: la tasa real depende de la financiera
- * que finalmente evalúe la solicitud.
+ * que finalmente evalúe la solicitud. Calculada en base al promedio de casos
+ * reales de clientes (se recalibra a medida que se suman más ejemplos).
  */
-export const TASA_REFERENCIA_MENSUAL = 13.5
+export const TASA_REFERENCIA_MENSUAL = 11.64
 
 export interface EstimacionCuota {
   cuotaMensual: number
