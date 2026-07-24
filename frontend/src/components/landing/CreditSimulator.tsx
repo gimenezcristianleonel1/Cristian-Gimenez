@@ -5,10 +5,11 @@ import { estimarCuota, formatearMonto } from '../../lib/creditMath'
 
 const MONTO_MIN = 50_000
 const MONTO_MAX = 3_000_000
-const MONTO_PASO = 10_000
+const MONTO_PASO = 50_000
 
 const PLAZO_MIN = 3
 const PLAZO_MAX = 48
+const PLAZO_PASO = 3
 
 interface CreditSimulatorProps {
   onVerOfertas: (monto: number, cuotas: number) => void
@@ -65,7 +66,7 @@ export function CreditSimulator({ onVerOfertas }: CreditSimulatorProps) {
             className="relative mt-3 flex h-5 w-full touch-none items-center"
             min={PLAZO_MIN}
             max={PLAZO_MAX}
-            step={1}
+            step={PLAZO_PASO}
             value={[cuotas]}
             onValueChange={([v]) => setCuotas(v)}
             aria-label="Plazo en cuotas"
