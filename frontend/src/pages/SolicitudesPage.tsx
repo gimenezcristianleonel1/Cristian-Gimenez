@@ -85,6 +85,11 @@ export function SolicitudesPage() {
     return cliente ? cliente.usuario.nombre : `Cliente #${id}`
   }
 
+  function clienteActivo(id: number): boolean {
+    const cliente = clientes.find((c) => c.id === id)
+    return cliente ? cliente.usuario.activo : true
+  }
+
   function nombreFinanciador(id: number | null): string | null {
     if (id === null) return null
     return financiadores.find((f) => f.id === id)?.nombre ?? `Financiador #${id}`
@@ -146,9 +151,9 @@ export function SolicitudesPage() {
     })
   }
 
-  function toggleSeleccionarTodas() {
+  function toggleSeleccionarTodas(idsEliminables: number[]) {
     setSeleccionadas((actual) =>
-      actual.size === solicitudes.length ? new Set() : new Set(solicitudes.map((s) => s.id)),
+      actual.size === idsEliminables.length ? new Set() : new Set(idsEliminables),
     )
   }
 
@@ -156,9 +161,7 @@ export function SolicitudesPage() {
     if (seleccionadas.size === 0) return
     if (
       !window.confirm(
-        `¿Eliminar ${seleccionadas.size} solicitud${seleccionadas.size > 1 ? 'es' : ''} aprobada${
-          seleccionadas.size > 1 ? 's' : ''
-        }? Esta acción no se puede deshacer.`,
+        `¿Eliminar ${seleccionadas.size} solicitud${seleccionadas.size > 1 ? 'es' : ''}? Esta acción no se puede deshacer.`,
       )
     ) {
       return
@@ -178,7 +181,7 @@ export function SolicitudesPage() {
   }
 
   async function eliminarUna(id: number) {
-    if (!window.confirm('¿Eliminar esta solicitud aprobada? Esta acción no se puede deshacer.')) return
+    if (!window.confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.')) return
     setError(null)
     try {
       await api.delete(`/prestamos/${id}`)
@@ -214,7 +217,13 @@ export function SolicitudesPage() {
     }
   }
 
-  const puedeEliminar = esAdministrador && filtro === 'aprobado'
+  function puedeEliminarFila(s: Prestamo): boolean {
+    if (!esAdministrador) return false
+    return filtro === 'aprobado' || !clienteActivo(s.cliente_id)
+  }
+
+  const filasEliminables = solicitudes.filter(puedeEliminarFila)
+  const mostrarColumnaEliminar = filasEliminables.length > 0
 
   return (
     <div>
@@ -328,7 +337,7 @@ export function SolicitudesPage() {
             </button>
           ))}
         </div>
-        {puedeEliminar && seleccionadas.size > 0 && (
+        {mostrarColumnaEliminar && seleccionadas.size > 0 && (
           <button
             onClick={eliminarSeleccionadas}
             disabled={eliminando}
@@ -348,12 +357,12 @@ export function SolicitudesPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                {puedeEliminar && (
+                {mostrarColumnaEliminar && (
                   <th className="px-4 py-2">
                     <input
                       type="checkbox"
-                      checked={seleccionadas.size === solicitudes.length}
-                      onChange={toggleSeleccionarTodas}
+                      checked={seleccionadas.size === filasEliminables.length}
+                      onChange={() => toggleSeleccionarTodas(filasEliminables.map((s) => s.id))}
                       aria-label="Seleccionar todas"
                       className="h-4 w-4 rounded border-slate-300"
                     />
@@ -373,18 +382,27 @@ export function SolicitudesPage() {
               {solicitudes.map((s) => (
                 <Fragment key={s.id}>
                   <tr className="border-b border-slate-100 last:border-0">
-                    {puedeEliminar && (
+                    {mostrarColumnaEliminar && (
                       <td className="px-4 py-2">
-                        <input
-                          type="checkbox"
-                          checked={seleccionadas.has(s.id)}
-                          onChange={() => toggleSeleccionada(s.id)}
-                          aria-label={`Seleccionar solicitud de ${nombreCliente(s.cliente_id)}`}
-                          className="h-4 w-4 rounded border-slate-300"
-                        />
+                        {puedeEliminarFila(s) && (
+                          <input
+                            type="checkbox"
+                            checked={seleccionadas.has(s.id)}
+                            onChange={() => toggleSeleccionada(s.id)}
+                            aria-label={`Seleccionar solicitud de ${nombreCliente(s.cliente_id)}`}
+                            className="h-4 w-4 rounded border-slate-300"
+                          />
+                        )}
                       </td>
                     )}
-                    <td className="px-4 py-2 font-medium text-navy-900">{nombreCliente(s.cliente_id)}</td>
+                    <td className="px-4 py-2 font-medium text-navy-900">
+                      {nombreCliente(s.cliente_id)}
+                      {!clienteActivo(s.cliente_id) && (
+                        <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">
+                          Baja
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
                     <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
                     <td className="px-4 py-2 text-slate-600">{s.tasa ? `${s.tasa}%` : '—'}</td>
@@ -407,7 +425,7 @@ export function SolicitudesPage() {
                         >
                           {expandidoId === s.id ? 'Ocultar' : 'Ver'}
                         </button>
-                        {puedeEliminar && (
+                        {puedeEliminarFila(s) && (
                           <button
                             onClick={() => eliminarUna(s.id)}
                             className="rounded-md border border-red-300 px-2.5 py-1 text-xs text-red-700 hover:bg-red-50"
@@ -420,7 +438,7 @@ export function SolicitudesPage() {
                   </tr>
                   {expandidoId === s.id && (
                     <tr className="border-b border-slate-100 bg-slate-50">
-                      <td colSpan={puedeEliminar ? 9 : 8} className="px-4 py-4">
+                      <td colSpan={mostrarColumnaEliminar ? 9 : 8} className="px-4 py-4">
                         <div className="flex flex-col gap-3 text-sm">
                           {s.observaciones && (
                             <p className="text-slate-600">
