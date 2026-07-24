@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
+import { Info } from 'lucide-react'
 import { estimarCuota, formatearMonto } from '../../lib/creditMath'
 
 const MONTO_MIN = 50_000
@@ -85,8 +86,14 @@ export function CreditSimulator({ onVerOfertas }: CreditSimulatorProps) {
           <p className="mt-1 text-3xl font-extrabold text-emerald-accent-400">
             {formatearMonto(estimacion.cuotaMensual)}
           </p>
-          <p className="mt-2 text-xs text-navy-200">
-            Estimación de referencia. La tasa y cuota final dependen de la financiera que te asigne.
+        </div>
+
+        <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p>
+            Este valor es solo una referencia y <strong>no representa la tasa real</strong> que vas a
+            recibir. La tasa final depende de tu situación particular (ingresos, situación laboral, historial)
+            y de la financiera que te asigne para el crédito.
           </p>
         </div>
 
