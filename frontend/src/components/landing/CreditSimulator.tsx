@@ -1,15 +1,19 @@
 import { useMemo, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
-import { Info } from 'lucide-react'
+import { Info, Minus, Plus } from 'lucide-react'
 import { estimarCuota, formatearMonto } from '../../lib/creditMath'
 
 const MONTO_MIN = 50_000
 const MONTO_MAX = 3_000_000
-const MONTO_PASO = 50_000
+const MONTO_PASO = 10_000
 
 const PLAZO_MIN = 3
 const PLAZO_MAX = 48
-const PLAZO_PASO = 3
+const PLAZO_PASO = 1
+
+function clamp(valor: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, valor))
+}
 
 interface CreditSimulatorProps {
   onVerOfertas: (monto: number, cuotas: number) => void
@@ -33,21 +37,39 @@ export function CreditSimulator({ onVerOfertas }: CreditSimulatorProps) {
             </label>
             <span className="text-lg font-bold text-navy-900">{formatearMonto(monto)}</span>
           </div>
-          <Slider.Root
-            id="slider-monto"
-            className="relative mt-3 flex h-5 w-full touch-none items-center"
-            min={MONTO_MIN}
-            max={MONTO_MAX}
-            step={MONTO_PASO}
-            value={[monto]}
-            onValueChange={([v]) => setMonto(v)}
-            aria-label="Monto del crédito"
-          >
-            <Slider.Track className="relative h-1.5 w-full grow rounded-full bg-slate-200">
-              <Slider.Range className="absolute h-full rounded-full bg-emerald-accent-600" />
-            </Slider.Track>
-            <Slider.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-accent-600 bg-white shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-accent-100" />
-          </Slider.Root>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMonto((v) => clamp(v - MONTO_PASO, MONTO_MIN, MONTO_MAX))}
+              aria-label="Reducir monto"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-600 hover:bg-slate-100"
+            >
+              <Minus className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+            <Slider.Root
+              id="slider-monto"
+              className="relative flex h-5 w-full touch-none items-center"
+              min={MONTO_MIN}
+              max={MONTO_MAX}
+              step={MONTO_PASO}
+              value={[monto]}
+              onValueChange={([v]) => setMonto(v)}
+              aria-label="Monto del crédito"
+            >
+              <Slider.Track className="relative h-1.5 w-full grow rounded-full bg-slate-200">
+                <Slider.Range className="absolute h-full rounded-full bg-emerald-accent-600" />
+              </Slider.Track>
+              <Slider.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-accent-600 bg-white shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-accent-100" />
+            </Slider.Root>
+            <button
+              type="button"
+              onClick={() => setMonto((v) => clamp(v + MONTO_PASO, MONTO_MIN, MONTO_MAX))}
+              aria-label="Aumentar monto"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-600 hover:bg-slate-100"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
           <div className="mt-1 flex justify-between text-xs text-slate-400">
             <span>{formatearMonto(MONTO_MIN)}</span>
             <span>{formatearMonto(MONTO_MAX)}</span>
@@ -61,21 +83,39 @@ export function CreditSimulator({ onVerOfertas }: CreditSimulatorProps) {
             </label>
             <span className="text-lg font-bold text-navy-900">{cuotas} meses</span>
           </div>
-          <Slider.Root
-            id="slider-plazo"
-            className="relative mt-3 flex h-5 w-full touch-none items-center"
-            min={PLAZO_MIN}
-            max={PLAZO_MAX}
-            step={PLAZO_PASO}
-            value={[cuotas]}
-            onValueChange={([v]) => setCuotas(v)}
-            aria-label="Plazo en cuotas"
-          >
-            <Slider.Track className="relative h-1.5 w-full grow rounded-full bg-slate-200">
-              <Slider.Range className="absolute h-full rounded-full bg-emerald-accent-600" />
-            </Slider.Track>
-            <Slider.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-accent-600 bg-white shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-accent-100" />
-          </Slider.Root>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCuotas((v) => clamp(v - PLAZO_PASO, PLAZO_MIN, PLAZO_MAX))}
+              aria-label="Reducir plazo"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-600 hover:bg-slate-100"
+            >
+              <Minus className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+            <Slider.Root
+              id="slider-plazo"
+              className="relative flex h-5 w-full touch-none items-center"
+              min={PLAZO_MIN}
+              max={PLAZO_MAX}
+              step={PLAZO_PASO}
+              value={[cuotas]}
+              onValueChange={([v]) => setCuotas(v)}
+              aria-label="Plazo en cuotas"
+            >
+              <Slider.Track className="relative h-1.5 w-full grow rounded-full bg-slate-200">
+                <Slider.Range className="absolute h-full rounded-full bg-emerald-accent-600" />
+              </Slider.Track>
+              <Slider.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-accent-600 bg-white shadow focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-accent-100" />
+            </Slider.Root>
+            <button
+              type="button"
+              onClick={() => setCuotas((v) => clamp(v + PLAZO_PASO, PLAZO_MIN, PLAZO_MAX))}
+              aria-label="Aumentar plazo"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-600 hover:bg-slate-100"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
           <div className="mt-1 flex justify-between text-xs text-slate-400">
             <span>{PLAZO_MIN} meses</span>
             <span>{PLAZO_MAX} meses</span>
