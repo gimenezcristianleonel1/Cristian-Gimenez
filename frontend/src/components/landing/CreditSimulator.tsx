@@ -95,7 +95,7 @@ export function CreditSimulator({ onVerOfertas }: CreditSimulatorProps) {
           onClick={() => onVerOfertas(monto, cuotas)}
           className="w-full rounded-full bg-emerald-accent-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-accent-700"
         >
-          Ver ofertas disponibles
+          Solicitar crédito
         </button>
       </div>
     </div>

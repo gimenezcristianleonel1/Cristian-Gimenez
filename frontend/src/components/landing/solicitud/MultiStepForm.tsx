@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
@@ -58,6 +58,10 @@ export function MultiStepForm({ montoInicial, cuotasInicial }: MultiStepFormProp
   const [mensajeCarga, setMensajeCarga] = useState('')
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null)
   const [prestamoCreado, setPrestamoCreado] = useState<Prestamo | null>(null)
+
+  useEffect(() => {
+    setData((prev) => ({ ...prev, monto: montoInicial, cuotas: cuotasInicial }))
+  }, [montoInicial, cuotasInicial])
 
   function actualizarData(patch: Partial<SolicitudFormData>) {
     setData((prev) => ({ ...prev, ...patch }))
