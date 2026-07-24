@@ -23,6 +23,14 @@ class SolicitudStaffCreate(BaseModel):
     observaciones: str | None = Field(default=None, max_length=2000)
 
 
+class PrestamoUpdate(BaseModel):
+    monto_solicitado: Decimal | None = Field(default=None, gt=0, decimal_places=2)
+    cantidad_cuotas: int | None = Field(default=None, gt=0, le=360)
+    tasa: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    destino: str | None = Field(default=None, min_length=5, max_length=2000)
+    observaciones: str | None = Field(default=None, max_length=2000)
+
+
 class EvaluacionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

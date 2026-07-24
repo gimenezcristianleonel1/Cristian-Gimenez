@@ -13,6 +13,7 @@ from app.modules.prestamos.schemas import (
     EvaluacionCreate,
     PrestamoCreate,
     PrestamoResponse,
+    PrestamoUpdate,
     SolicitudStaffCreate,
 )
 from app.modules.prestamos.service import PrestamoService
@@ -99,6 +100,26 @@ def evaluar_prestamo(
         prestamo_id=prestamo_id,
         aprobado_por_id=staff.id,
         decision=data.decision,
+        observaciones=data.observaciones,
+    )
+
+
+@router.put(
+    "/{prestamo_id}",
+    response_model=PrestamoResponse,
+    dependencies=[Depends(require_staff_roles(RolStaff.ADMINISTRADOR, RolStaff.OPERADOR))],
+)
+def editar_prestamo(
+    prestamo_id: int,
+    data: PrestamoUpdate,
+    service: PrestamoService = Depends(get_prestamo_service),
+) -> PrestamoResponse:
+    return service.actualizar(
+        prestamo_id,
+        monto_solicitado=data.monto_solicitado,
+        cantidad_cuotas=data.cantidad_cuotas,
+        tasa=data.tasa,
+        destino=data.destino,
         observaciones=data.observaciones,
     )
 

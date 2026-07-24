@@ -102,6 +102,34 @@ class PrestamoService:
             observaciones=observaciones,
         )
 
+    def actualizar(
+        self,
+        prestamo_id: int,
+        monto_solicitado: Decimal | None,
+        cantidad_cuotas: int | None,
+        tasa: Decimal | None,
+        destino: str | None,
+        observaciones: str | None,
+    ) -> Prestamo:
+        prestamo = self.repository.get_by_id(prestamo_id)
+        if prestamo is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Préstamo no encontrado")
+
+        if prestamo.estado != EstadoPrestamo.PENDIENTE:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Solo se pueden modificar los datos de una solicitud pendiente",
+            )
+
+        return self.repository.update(
+            prestamo,
+            monto_solicitado=monto_solicitado,
+            cantidad_cuotas=cantidad_cuotas,
+            tasa=tasa,
+            destino=destino,
+            observaciones=observaciones,
+        )
+
     def eliminar(self, prestamo_id: int) -> None:
         prestamo = self.repository.get_by_id(prestamo_id)
         if prestamo is None:

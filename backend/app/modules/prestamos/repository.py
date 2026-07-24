@@ -88,6 +88,30 @@ class PrestamoRepository:
         self.db.refresh(prestamo)
         return prestamo
 
+    def update(
+        self,
+        prestamo: Prestamo,
+        monto_solicitado: Decimal | None = None,
+        cantidad_cuotas: int | None = None,
+        tasa: Decimal | None = None,
+        destino: str | None = None,
+        observaciones: str | None = None,
+    ) -> Prestamo:
+        if monto_solicitado is not None:
+            prestamo.monto_solicitado = monto_solicitado
+        if cantidad_cuotas is not None:
+            prestamo.cantidad_cuotas = cantidad_cuotas
+        if tasa is not None:
+            prestamo.tasa = tasa
+        if destino is not None:
+            prestamo.destino = destino
+        if observaciones is not None:
+            prestamo.observaciones = observaciones
+        self.db.add(prestamo)
+        self.db.commit()
+        self.db.refresh(prestamo)
+        return prestamo
+
     def delete(self, prestamo: Prestamo) -> None:
         if prestamo.evaluacion is not None:
             self.db.delete(prestamo.evaluacion)

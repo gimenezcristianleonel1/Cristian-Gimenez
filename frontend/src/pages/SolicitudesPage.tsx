@@ -61,6 +61,15 @@ export function SolicitudesPage() {
   const [seleccionadas, setSeleccionadas] = useState<Set<number>>(new Set())
   const [eliminando, setEliminando] = useState(false)
 
+  interface EdicionForm {
+    monto_solicitado: string
+    cantidad_cuotas: string
+    tasa: string
+    destino: string
+  }
+  const [edicion, setEdicion] = useState<Record<number, EdicionForm>>({})
+  const [guardandoEdicionId, setGuardandoEdicionId] = useState<number | null>(null)
+
   async function cargar(f: Filtro) {
     setCargando(true)
     const { data } = await api.get<Prestamo[]>('/prestamos', { params: { estado: f } })
@@ -139,6 +148,49 @@ export function SolicitudesPage() {
       setError(apiErrorMessage(err, 'No se pudo registrar la decisión'))
     } finally {
       setProcesandoId(null)
+    }
+  }
+
+  function campoEdicion(s: Prestamo): EdicionForm {
+    return (
+      edicion[s.id] ?? {
+        monto_solicitado: String(s.monto_solicitado),
+        cantidad_cuotas: String(s.cantidad_cuotas),
+        tasa: s.tasa !== null ? String(s.tasa) : '',
+        destino: s.destino,
+      }
+    )
+  }
+
+  function setCampoEdicion(s: Prestamo, campo: keyof EdicionForm, valor: string) {
+    setEdicion((actual) => ({ ...actual, [s.id]: { ...campoEdicion(s), [campo]: valor } }))
+  }
+
+  async function guardarEdicion(s: Prestamo) {
+    const datos = campoEdicion(s)
+    if (!datos.tasa) {
+      setError('Ingresá una tasa antes de guardar los cambios')
+      return
+    }
+    setError(null)
+    setGuardandoEdicionId(s.id)
+    try {
+      await api.put(`/prestamos/${s.id}`, {
+        monto_solicitado: Number(datos.monto_solicitado),
+        cantidad_cuotas: Number(datos.cantidad_cuotas),
+        tasa: Number(datos.tasa),
+        destino: datos.destino,
+      })
+      setEdicion((actual) => {
+        const copia = { ...actual }
+        delete copia[s.id]
+        return copia
+      })
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudieron guardar los cambios'))
+    } finally {
+      setGuardandoEdicionId(null)
     }
   }
 
@@ -459,6 +511,64 @@ export function SolicitudesPage() {
 
                           {s.estado === 'pendiente' && (
                             <div className="flex flex-col gap-2">
+                              <div className="rounded-md border border-slate-200 bg-white p-3">
+                                <p className="mb-2 text-xs font-medium text-slate-500">
+                                  Datos del crédito (completá la tasa antes de aprobar):
+                                </p>
+                                <div className="grid gap-2 sm:grid-cols-4">
+                                  <div>
+                                    <label className="mb-1 block text-xs text-slate-500">Monto</label>
+                                    <input
+                                      type="number"
+                                      min="0.01"
+                                      step="0.01"
+                                      value={campoEdicion(s).monto_solicitado}
+                                      onChange={(e) => setCampoEdicion(s, 'monto_solicitado', e.target.value)}
+                                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-xs text-slate-500">Cuotas</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="360"
+                                      value={campoEdicion(s).cantidad_cuotas}
+                                      onChange={(e) => setCampoEdicion(s, 'cantidad_cuotas', e.target.value)}
+                                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-xs text-slate-500">Tasa por cuota (%)</label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="Ej. 4.5"
+                                      value={campoEdicion(s).tasa}
+                                      onChange={(e) => setCampoEdicion(s, 'tasa', e.target.value)}
+                                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-xs text-slate-500">Destino</label>
+                                    <input
+                                      value={campoEdicion(s).destino}
+                                      onChange={(e) => setCampoEdicion(s, 'destino', e.target.value)}
+                                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                                    />
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => guardarEdicion(s)}
+                                  disabled={guardandoEdicionId === s.id}
+                                  className="mt-2 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                                >
+                                  {guardandoEdicionId === s.id ? 'Guardando...' : 'Guardar cambios'}
+                                </button>
+                              </div>
+
                               <div>
                                 <p className="mb-1 text-xs font-medium text-slate-500">Motivos frecuentes:</p>
                                 <div className="flex flex-wrap gap-1.5">
