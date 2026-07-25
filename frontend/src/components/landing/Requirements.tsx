@@ -10,17 +10,13 @@ interface CategoriaRequisitos {
 
 const CATEGORIAS: CategoriaRequisitos[] = [
   {
-    titulo: 'Jubilados y Pensionados Nacionales',
+    titulo: 'Jubilados y Pensionados de ANSES',
     edad: '18 a 80 años',
     imagen: jubiladosFoto,
     items: [
       'Argentino nativo o por opción.',
-      'Cobrar los haberes en cualquier banco (consultar excluidos).',
-      'Documento de Identidad.',
-      'Acreditación de domicilio (factura o servicio a su nombre).',
-      'Último recibo de haberes.',
-      'Últimos tres meses de movimientos de la caja de ahorro donde se realizarán los débitos.',
-      'Constancia original de CBU.',
+      'Ser jubilado/a o pensionado/a de ANSES.',
+      'Solo necesitás tu Documento de Identidad (DNI).',
     ],
   },
   {

@@ -2,7 +2,7 @@ import { CheckCircle2, MessageCircle } from 'lucide-react'
 import { TELEFONOS_ASESORES, linkWhatsapp } from '../../lib/contacto'
 import jubiladosDniFoto from '../../assets/jubilados-dni-foto.jpg'
 
-const BENEFICIOS = ['Trámite simple, sin vueltas', 'Acreditación rápida', 'Atención personalizada para tu caso']
+const BENEFICIOS = ['Solo necesitás tu DNI', 'Acreditación rápida', 'Atención personalizada para tu caso']
 
 const MENSAJE = 'Hola, quiero consultar por el crédito para jubilados y pensionados de ANSES.'
 
@@ -24,8 +24,8 @@ export function JubiladosDestacado() {
             Créditos para Jubilados y Pensionados de ANSES
           </h2>
           <p className="mt-4 text-lg text-emerald-accent-50">
-            Comercializamos en todo el país. Un trámite pensado para que lo puedas resolver rápido
-            y sin complicaciones.
+            Comercializamos en todo el país. Si sos jubilado o pensionado de ANSES, podés acceder a
+            tu crédito presentando solamente tu DNI.
           </p>
           <ul className="mt-6 flex flex-col items-center gap-3 lg:items-start">
             {BENEFICIOS.map((beneficio) => (
