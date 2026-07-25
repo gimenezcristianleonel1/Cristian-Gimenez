@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState, type FormEvent } from 'react'
 import { useStaffAuth } from '../auth/StaffAuthContext'
 import { api, apiErrorMessage } from '../lib/api'
+import { estimarCuota, formatearMonto } from '../lib/creditMath'
 import { MOTIVOS_APROBACION, MOTIVOS_RECHAZO } from '../lib/motivosEvaluacion'
 import type { Cliente, DecisionEvaluacion, EstadoPrestamo, Financiador, Prestamo } from '../types'
 
@@ -600,14 +601,45 @@ export function SolicitudesPage() {
                                     />
                                   </div>
                                   <div>
-                                    <label className="mb-1 block text-xs text-slate-500">Destino</label>
+                                    <label className="mb-1 block text-xs text-slate-500">Cuota mensual ($)</label>
                                     <input
-                                      value={campoEdicion(s).destino}
-                                      onChange={(e) => setCampoEdicion(s, 'destino', e.target.value)}
+                                      type="number"
+                                      min="0.01"
+                                      step="0.01"
+                                      placeholder="Valor real de la cuota"
+                                      value={campoEdicion(s).cuota_mensual}
+                                      onChange={(e) => setCampoEdicion(s, 'cuota_mensual', e.target.value)}
                                       className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
                                     />
                                   </div>
                                 </div>
+                                <div className="mt-2">
+                                  <label className="mb-1 block text-xs text-slate-500">Destino</label>
+                                  <input
+                                    value={campoEdicion(s).destino}
+                                    onChange={(e) => setCampoEdicion(s, 'destino', e.target.value)}
+                                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                                  />
+                                </div>
+
+                                {Number(campoEdicion(s).monto_solicitado) > 0 &&
+                                  Number(campoEdicion(s).cantidad_cuotas) > 0 &&
+                                  Number(campoEdicion(s).tasa) > 0 && (
+                                    <p className="mt-2 text-xs text-slate-500">
+                                      Con esa tasa, cada cuota daría aproximadamente{' '}
+                                      <span className="font-semibold text-navy-900">
+                                        {formatearMonto(
+                                          estimarCuota(
+                                            Number(campoEdicion(s).monto_solicitado),
+                                            Number(campoEdicion(s).cantidad_cuotas),
+                                            Number(campoEdicion(s).tasa),
+                                          ).cuotaMensual,
+                                        )}
+                                      </span>
+                                      . Si el valor real es otro, cargalo en "Cuota mensual".
+                                    </p>
+                                  )}
+
                                 <button
                                   type="button"
                                   onClick={() => guardarEdicion(s)}
