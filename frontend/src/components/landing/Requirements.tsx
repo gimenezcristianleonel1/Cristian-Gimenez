@@ -1,11 +1,14 @@
 import { CheckCircle2 } from 'lucide-react'
 import jubiladosFoto from '../../assets/jubilados-foto.jpg'
+import empleadosPrivadosFoto from '../../assets/empleados-privados-foto.jpg'
+import empleadosProvincialesFoto from '../../assets/empleados-provinciales-foto.jpg'
 
 interface CategoriaRequisitos {
   titulo: string
   edad: string
   items: string[]
   imagen?: string
+  imagenAspecto?: string
 }
 
 const CATEGORIAS: CategoriaRequisitos[] = [
@@ -13,6 +16,7 @@ const CATEGORIAS: CategoriaRequisitos[] = [
     titulo: 'Jubilados y Pensionados de ANSES',
     edad: '18 a 80 años',
     imagen: jubiladosFoto,
+    imagenAspecto: 'aspect-[409/560]',
     items: [
       'Argentino nativo o por opción.',
       'Ser jubilado/a o pensionado/a de ANSES.',
@@ -22,6 +26,8 @@ const CATEGORIAS: CategoriaRequisitos[] = [
   {
     titulo: 'Empleados Privados (Mercado Abierto)',
     edad: '18 a 65 años',
+    imagen: empleadosPrivadosFoto,
+    imagenAspecto: 'aspect-[820/516]',
     items: [
       'Argentino nativo o por opción.',
       'Cobrar los haberes en una entidad bancaria (consultar bancos excluidos).',
@@ -34,6 +40,8 @@ const CATEGORIAS: CategoriaRequisitos[] = [
   {
     titulo: 'Empleados Provinciales',
     edad: '18 a 75 años (mujeres) · 18 a 65 años (hombres)',
+    imagen: empleadosProvincialesFoto,
+    imagenAspecto: 'aspect-[840/510]',
     items: [
       'Argentino nativo o por opción.',
       'Documento de Identidad.',
@@ -65,7 +73,7 @@ export function Requirements() {
                   src={categoria.imagen}
                   alt=""
                   aria-hidden="true"
-                  className="-mx-6 -mt-6 mb-4 aspect-[409/560] w-[calc(100%+3rem)] rounded-t-2xl object-cover"
+                  className={`-mx-6 -mt-6 mb-4 w-[calc(100%+3rem)] rounded-t-2xl object-cover ${categoria.imagenAspecto ?? 'aspect-video'}`}
                 />
               )}
               <h3 className="text-base font-semibold text-navy-900">{categoria.titulo}</h3>
