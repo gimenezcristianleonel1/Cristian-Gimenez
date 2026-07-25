@@ -69,7 +69,7 @@ export function Requirements() {
                   src={categoria.imagen}
                   alt=""
                   aria-hidden="true"
-                  className="-mx-6 -mt-6 mb-4 h-40 w-[calc(100%+3rem)] rounded-t-2xl object-cover"
+                  className="-mx-6 -mt-6 mb-4 h-52 w-[calc(100%+3rem)] rounded-t-2xl object-cover"
                 />
               )}
               <h3 className="text-base font-semibold text-navy-900">{categoria.titulo}</h3>
