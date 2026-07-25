@@ -27,6 +27,7 @@ class PrestamoUpdate(BaseModel):
     monto_solicitado: Decimal | None = Field(default=None, gt=0, decimal_places=2)
     cantidad_cuotas: int | None = Field(default=None, gt=0, le=360)
     tasa: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    cuota_mensual: Decimal | None = Field(default=None, gt=0, decimal_places=2)
     destino: str | None = Field(default=None, min_length=5, max_length=2000)
     observaciones: str | None = Field(default=None, max_length=2000)
 
@@ -50,6 +51,7 @@ class PrestamoResponse(BaseModel):
     cantidad_cuotas: int
     destino: str
     tasa: Decimal | None
+    cuota_mensual: Decimal | None
     observaciones: str | None
     estado: EstadoPrestamo
     financiador_id: int | None

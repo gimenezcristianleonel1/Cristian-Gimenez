@@ -49,6 +49,7 @@ export interface Prestamo {
   cantidad_cuotas: number
   destino: string
   tasa: string | null
+  cuota_mensual: string | null
   observaciones: string | null
   estado: EstadoPrestamo
   financiador_id: number | null

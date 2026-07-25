@@ -108,6 +108,7 @@ class PrestamoService:
         monto_solicitado: Decimal | None,
         cantidad_cuotas: int | None,
         tasa: Decimal | None,
+        cuota_mensual: Decimal | None,
         destino: str | None,
         observaciones: str | None,
     ) -> Prestamo:
@@ -126,6 +127,7 @@ class PrestamoService:
             monto_solicitado=monto_solicitado,
             cantidad_cuotas=cantidad_cuotas,
             tasa=tasa,
+            cuota_mensual=cuota_mensual,
             destino=destino,
             observaciones=observaciones,
         )

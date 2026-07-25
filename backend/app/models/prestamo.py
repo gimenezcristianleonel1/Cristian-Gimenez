@@ -17,6 +17,7 @@ class Prestamo(Base):
     cantidad_cuotas: Mapped[int] = mapped_column(nullable=False)
     destino: Mapped[str] = mapped_column(Text, nullable=False)
     tasa: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    cuota_mensual: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     observaciones: Mapped[str | None] = mapped_column(Text, nullable=True)
     estado: Mapped[EstadoPrestamo] = mapped_column(
         Enum(EstadoPrestamo, name="estado_prestamo"),

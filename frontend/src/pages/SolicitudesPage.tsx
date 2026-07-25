@@ -65,6 +65,7 @@ export function SolicitudesPage() {
     monto_solicitado: string
     cantidad_cuotas: string
     tasa: string
+    cuota_mensual: string
     destino: string
   }
   const [edicion, setEdicion] = useState<Record<number, EdicionForm>>({})
@@ -157,6 +158,7 @@ export function SolicitudesPage() {
         monto_solicitado: String(s.monto_solicitado),
         cantidad_cuotas: String(s.cantidad_cuotas),
         tasa: s.tasa !== null ? String(s.tasa) : '',
+        cuota_mensual: s.cuota_mensual !== null ? String(s.cuota_mensual) : '',
         destino: s.destino,
       }
     )
@@ -179,6 +181,7 @@ export function SolicitudesPage() {
         monto_solicitado: Number(datos.monto_solicitado),
         cantidad_cuotas: Number(datos.cantidad_cuotas),
         tasa: Number(datos.tasa),
+        cuota_mensual: datos.cuota_mensual ? Number(datos.cuota_mensual) : undefined,
         destino: datos.destino,
       })
       setEdicion((actual) => {
@@ -189,6 +192,24 @@ export function SolicitudesPage() {
       await cargar(filtro)
     } catch (err) {
       setError(apiErrorMessage(err, 'No se pudieron guardar los cambios'))
+    } finally {
+      setGuardandoEdicionId(null)
+    }
+  }
+
+  async function guardarCuota(s: Prestamo) {
+    const datos = campoEdicion(s)
+    if (!datos.cuota_mensual) {
+      setError('Ingresá un monto de cuota antes de guardar')
+      return
+    }
+    setError(null)
+    setGuardandoEdicionId(s.id)
+    try {
+      await api.put(`/prestamos/${s.id}`, { cuota_mensual: Number(datos.cuota_mensual) })
+      await cargar(filtro)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'No se pudo guardar la cuota'))
     } finally {
       setGuardandoEdicionId(null)
     }
@@ -424,6 +445,7 @@ export function SolicitudesPage() {
                 <th className="px-4 py-2">Monto</th>
                 <th className="px-4 py-2">Cuotas</th>
                 <th className="px-4 py-2">Tasa</th>
+                <th className="px-4 py-2">Cuota mensual</th>
                 <th className="px-4 py-2">Destino</th>
                 <th className="px-4 py-2">Fecha</th>
                 <th className="px-4 py-2">Estado</th>
@@ -458,6 +480,33 @@ export function SolicitudesPage() {
                     <td className="px-4 py-2 text-slate-600">${s.monto_solicitado}</td>
                     <td className="px-4 py-2 text-slate-600">{s.cantidad_cuotas}</td>
                     <td className="px-4 py-2 text-slate-600">{s.tasa ? `${s.tasa}%` : '—'}</td>
+                    <td className="px-4 py-2 text-slate-600">
+                      {s.estado === 'pendiente' && esAdministrador ? (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Monto"
+                            value={campoEdicion(s).cuota_mensual}
+                            onChange={(e) => setCampoEdicion(s, 'cuota_mensual', e.target.value)}
+                            className="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-emerald-accent-500 focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => guardarCuota(s)}
+                            disabled={guardandoEdicionId === s.id}
+                            className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                          >
+                            {guardandoEdicionId === s.id ? '...' : 'Guardar'}
+                          </button>
+                        </div>
+                      ) : s.cuota_mensual ? (
+                        `$${s.cuota_mensual}`
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-slate-600">{s.destino}</td>
                     <td className="px-4 py-2 text-slate-600">
                       {new Date(s.fecha_solicitud).toLocaleDateString()}
@@ -490,7 +539,7 @@ export function SolicitudesPage() {
                   </tr>
                   {expandidoId === s.id && (
                     <tr className="border-b border-slate-100 bg-slate-50">
-                      <td colSpan={mostrarColumnaEliminar ? 9 : 8} className="px-4 py-4">
+                      <td colSpan={mostrarColumnaEliminar ? 10 : 9} className="px-4 py-4">
                         <div className="flex flex-col gap-3 text-sm">
                           {s.observaciones && (
                             <p className="text-slate-600">

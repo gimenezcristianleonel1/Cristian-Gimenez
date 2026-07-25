@@ -94,6 +94,7 @@ class PrestamoRepository:
         monto_solicitado: Decimal | None = None,
         cantidad_cuotas: int | None = None,
         tasa: Decimal | None = None,
+        cuota_mensual: Decimal | None = None,
         destino: str | None = None,
         observaciones: str | None = None,
     ) -> Prestamo:
@@ -103,6 +104,8 @@ class PrestamoRepository:
             prestamo.cantidad_cuotas = cantidad_cuotas
         if tasa is not None:
             prestamo.tasa = tasa
+        if cuota_mensual is not None:
+            prestamo.cuota_mensual = cuota_mensual
         if destino is not None:
             prestamo.destino = destino
         if observaciones is not None:

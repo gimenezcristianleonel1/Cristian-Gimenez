@@ -119,6 +119,7 @@ def editar_prestamo(
         monto_solicitado=data.monto_solicitado,
         cantidad_cuotas=data.cantidad_cuotas,
         tasa=data.tasa,
+        cuota_mensual=data.cuota_mensual,
         destino=data.destino,
         observaciones=data.observaciones,
     )
