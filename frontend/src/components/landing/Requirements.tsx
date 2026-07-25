@@ -1,15 +1,18 @@
 import { CheckCircle2 } from 'lucide-react'
+import jubiladosFoto from '../../assets/jubilados-foto.jpg'
 
 interface CategoriaRequisitos {
   titulo: string
   edad: string
   items: string[]
+  imagen?: string
 }
 
 const CATEGORIAS: CategoriaRequisitos[] = [
   {
     titulo: 'Jubilados y Pensionados Nacionales',
     edad: '18 a 80 años',
+    imagen: jubiladosFoto,
     items: [
       'Argentino nativo o por opción.',
       'Cobrar los haberes en cualquier banco (consultar excluidos).',
@@ -61,6 +64,14 @@ export function Requirements() {
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {CATEGORIAS.map((categoria) => (
             <div key={categoria.titulo} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {categoria.imagen && (
+                <img
+                  src={categoria.imagen}
+                  alt=""
+                  aria-hidden="true"
+                  className="-mx-6 -mt-6 mb-4 h-40 w-[calc(100%+3rem)] rounded-t-2xl object-cover"
+                />
+              )}
               <h3 className="text-base font-semibold text-navy-900">{categoria.titulo}</h3>
               <span className="mt-1 inline-block w-fit rounded-full bg-emerald-accent-50 px-3 py-1 text-xs font-medium text-emerald-accent-700">
                 {categoria.edad}
