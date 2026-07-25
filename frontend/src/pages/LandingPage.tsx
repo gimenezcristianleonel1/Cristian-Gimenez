@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navbar } from '../components/landing/Navbar'
 import { Hero } from '../components/landing/Hero'
+import { JubiladosDestacado } from '../components/landing/JubiladosDestacado'
 import { QuienesSomos } from '../components/landing/QuienesSomos'
 import { HowItWorks } from '../components/landing/HowItWorks'
 import { Requirements } from '../components/landing/Requirements'
@@ -24,6 +25,7 @@ export function LandingPage() {
       <Navbar />
       <main>
         <Hero onVerOfertas={handleVerOfertas} />
+        <JubiladosDestacado />
         <QuienesSomos />
         <HowItWorks />
         <Requirements />

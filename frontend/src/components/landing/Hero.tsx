@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
 import { CreditSimulator } from './CreditSimulator'
+import jubiladosDniFoto from '../../assets/jubilados-dni-foto.jpg'
 
 interface HeroProps {
   onVerOfertas: (monto: number, cuotas: number) => void
@@ -9,6 +10,14 @@ interface HeroProps {
 export function Hero({ onVerOfertas }: HeroProps) {
   return (
     <section id="inicio" className="relative overflow-hidden bg-navy-950">
+      <div aria-hidden="true" className="absolute inset-0">
+        <img
+          src={jubiladosDniFoto}
+          alt=""
+          className="h-full w-full object-cover object-[80%_30%] opacity-40"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/90 to-navy-950/40" />
+      </div>
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_theme(colors.navy.700),_transparent_55%)]"
